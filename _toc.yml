@@ -1,7 +1,7 @@
 ﻿format: jb-book
 root: intro
 chapters:
-- file: md/00_panduan-dev
-  title: "Panduan Pengembangan"
+- file: md/00_pengantar-proyek
+  title: "ðŸŒ¤ï¸ Proyek Utama: Analisis Kualitas Udara Bangkalan"
 - file: md/01_mulai-disini
   title: "Mulai Menulis"
