@@ -13,7 +13,22 @@ if "%CMD%"=="dev" (
     goto :eof
 )
 if "%CMD%"=="publish" (
+    echo [1/3] Memperbarui TOC dan Membangun Buku...
     call scripts\publish.bat
+    
+    echo.
+    echo [2/3] Menyiapkan File untuk GitHub...
+    git add .
+    
+    echo [3/3] Mengunggah Perubahan...
+    :: Menggunakan timestamp agar pesan commit selalu unik
+    git commit -m "Update konten PSD: %date% %time%"
+    git push origin main
+    
+    echo.
+    echo ==========================================
+    echo BERHASIL! Buku sudah terbit di GitHub.
+    echo ==========================================
     goto :eof
 )
 if "%CMD%"=="config" (
