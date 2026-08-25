@@ -2,7 +2,7 @@
 # Learn more at https://jupyterbook.org/customize/config.html
 
 title: My sample book
-author: "Roti18"
+author: "Fathulimann123"
 copyright: "2026"
 logo: logo.png
 
@@ -22,7 +22,7 @@ bibtex_bibfiles:
 
 # Information about where the book exists on the web
 repository:
-  url: https://github.com/Roti18/jupyter-opz
+  url: https://github.com/Roti18/saintdata
   path_to_book: docs  # Optional path to your book, relative to the repository root
   branch: main
 
