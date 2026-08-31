@@ -182,7 +182,7 @@ plt.xlabel("Tanggal"); plt.ylabel("CH4 (ppb)")
 plt.tight_layout(); plt.show()
 df_ch4.to_csv("ch4_daily.csv")
 ```
-
+![gabungan dari 4 polutan](../img/udara/polutan1.png)
 ### Ringkasan Output
 
 | Output | Keterangan |
