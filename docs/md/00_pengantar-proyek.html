@@ -60,6 +60,8 @@
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'md/00_pengantar-proyek';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -221,6 +223,7 @@
         </ul>
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Business Understanding</a></li>
+
 
 <li class="toctree-l1"><a class="reference internal" href="01_mulai-disini.html">Mulai Menulis</a></li>
 </ul>
@@ -424,7 +427,22 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#membaca-data-melaporkan-kondisi-aslinya">Membaca Data &amp; Melaporkan Kondisi Aslinya</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eksplorasi-data-peta">Eksplorasi Data - Peta</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eksplorasi-data-grafik-csv-per-polutan">Eksplorasi Data - Grafik &amp; CSV per Polutan</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-output">Ringkasan Output</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-pertemuan-2">Tugas - Pertemuan 2</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#memindahkan-data-csv-ke-cloud-aiven-postgresql">1. Memindahkan Data CSV ke Cloud (Aiven PostgreSQL)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#menarik-data-dari-cloud-ke-knime">2. Menarik Data dari Cloud ke KNIME</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-properti-statistik-knime">3. Penjelasan Properti Statistik KNIME</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contoh-perhitungan-manual">4. Contoh Perhitungan Manual</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mean">Mean</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#median">Median</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#standar-deviasi-sampel">Standar Deviasi (Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#variance">Variance</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skewness-fisher-pearson-sampel">Skewness (Fisher-Pearson, Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kurtosis-excess-sampel">Kurtosis (Excess, Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overall-sum">Overall Sum</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -622,27 +640,298 @@
 </div>
 <p><img alt="gabungan dari 4 polutan" src="../_images/polutan1.png" /></p>
 </section>
-<section id="ringkasan-output">
-<h2>Ringkasan Output<a class="headerlink" href="#ringkasan-output" title="Link to this heading">#</a></h2>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="tugas-pertemuan-2">
+<h1>Tugas - Pertemuan 2<a class="headerlink" href="#tugas-pertemuan-2" title="Link to this heading">#</a></h1>
+<section id="memindahkan-data-csv-ke-cloud-aiven-postgresql">
+<h2>1. Memindahkan Data CSV ke Cloud (Aiven PostgreSQL)<a class="headerlink" href="#memindahkan-data-csv-ke-cloud-aiven-postgresql" title="Link to this heading">#</a></h2>
+<p>Empat file CSV hasil crawling Sentinel-5P dari tugas sebelumnya (<code class="docutils literal notranslate"><span class="pre">no2_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">co_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">so2_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">ch4_daily.csv</span></code>) dipindahkan ke database PostgreSQL yang di-<em>host</em> di <strong>Aiven</strong> (<a class="reference external" href="http://console.aiven.io">console.aiven.io</a>), agar data tersimpan secara terpusat di cloud dan bisa diakses dari alat lain (KNIME) tanpa perlu menyalin file secara manual.</p>
+<p><strong>Membuat service PostgreSQL di Aiven:</strong></p>
+<p>Service PostgreSQL dibuat lewat <a class="reference external" href="http://console.aiven.io">console.aiven.io</a> (Create service -&gt; PostgreSQL -&gt; plan Hobbyist/Free). Setelah status menjadi “Running”, Aiven menyediakan Service URI berisi kredensial koneksi (host, port, user, password, nama database).</p>
+<p><strong>Mengirim data dari Python (Google Colab) ke PostgreSQL:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">sqlalchemy</span> <span class="n">psycopg2</span><span class="o">-</span><span class="n">binary</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_engine</span>
+
+<span class="n">connection_string</span> <span class="o">=</span> <span class="s2">"postgresql://avnadmin:[password]@pg-110e932c-psd1-6fc0.f.aivencloud.com:13017/defaultdb?sslmode=require"</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">connection_string</span><span class="p">)</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"no2_daily.csv"</span><span class="p">:</span> <span class="s2">"no2"</span><span class="p">,</span>
+    <span class="s2">"co_daily.csv"</span><span class="p">:</span> <span class="s2">"co"</span><span class="p">,</span>
+    <span class="s2">"so2_daily.csv"</span><span class="p">:</span> <span class="s2">"so2"</span><span class="p">,</span>
+    <span class="s2">"ch4_daily.csv"</span><span class="p">:</span> <span class="s2">"ch4"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">table_name</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">engine</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> berhasil dikirim, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2"> baris"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">sqlalchemy</span></code> dipakai sebagai jembatan antara pandas dan PostgreSQL, sementara <code class="docutils literal notranslate"><span class="pre">psycopg2-binary</span></code> adalah driver yang menerjemahkan perintah Python menjadi protokol yang dipahami PostgreSQL. Fungsi <code class="docutils literal notranslate"><span class="pre">to_sql()</span></code> otomatis membuat tabel baru (jika belum ada) dan mengisi seluruh baris CSV ke dalamnya <code class="docutils literal notranslate"><span class="pre">if_exists=&quot;replace&quot;</span></code> memastikan tabel ditimpa dengan data terbaru setiap kali skrip dijalankan ulang, sehingga tidak terjadi duplikasi data.</p>
+<p><strong>Hasil:</strong></p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p>Output</p></th>
-<th class="head"><p>Keterangan</p></th>
+<tr class="row-odd"><th class="head"><p>Tabel</p></th>
+<th class="head"><p>Jumlah Baris</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">no2_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">co_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">so2_daily.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">ch4_daily.csv</span></code></p></td>
-<td><p>Time series harian per polutan, periode 24 Agst 2025–24 Agst 2026</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">no2</span></code></p></td>
+<td><p>363</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">peta_kualitas_udara.html</span></code></p></td>
-<td><p>Peta interaktif AOI Bangkalan-Burneh + ringkasan rata-rata 4 polutan</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">co</span></code></p></td>
+<td><p>365</p></td>
 </tr>
-<tr class="row-even"><td><p>Missing value</p></td>
-<td><p>NO2 43.3%, CO 38.9%, SO2 30.7%, CH4 92.1% — dilaporkan apa adanya, belum ditambal</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">so2</span></code></p></td>
+<td><p>361</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ch4</span></code></p></td>
+<td><p>214</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p><strong>Verifikasi:</strong></p>
+<p>Data yang sudah masuk diverifikasi langsung lewat fitur <strong>PG Studio</strong> pada console Aiven (query editor bawaan), dengan menjalankan:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">no2</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">co</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">so2</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">ch4</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Jumlah baris yang muncul di database cocok dengan jumlah baris pada file CSV asli, menandakan seluruh data berhasil dipindahkan tanpa ada yang hilang atau terpotong.</p>
+<p><img alt="sql-aiven" src="../_images/my-collage.png" /></p>
+</section>
+<section id="menarik-data-dari-cloud-ke-knime">
+<h2>2. Menarik Data dari Cloud ke KNIME<a class="headerlink" href="#menarik-data-dari-cloud-ke-knime" title="Link to this heading">#</a></h2>
+<p>Keempat tabel polutan (no2, co, so2, ch4) digabungkan terlebih dahulu menjadi satu tabel bernama polutan, agar dapat ditarik dan dianalisis sekaligus dalam satu alur kerja KNIME.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CREATE</span> <span class="n">TABLE</span> <span class="n">polutan</span> <span class="n">AS</span>
+<span class="n">WITH</span> <span class="n">all_dates</span> <span class="n">AS</span> <span class="p">(</span>
+    <span class="n">SELECT</span> <span class="n">date</span> <span class="n">FROM</span> <span class="n">no2</span>
+    <span class="n">UNION</span> <span class="n">SELECT</span> <span class="n">date</span> <span class="n">FROM</span> <span class="n">co</span>
+    <span class="n">UNION</span> <span class="n">SELECT</span> <span class="n">date</span> <span class="n">FROM</span> <span class="n">so2</span>
+    <span class="n">UNION</span> <span class="n">SELECT</span> <span class="n">date</span> <span class="n">FROM</span> <span class="n">ch4</span>
+<span class="p">)</span>
+<span class="n">SELECT</span> 
+    <span class="n">d</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">no2</span><span class="o">.</span><span class="s2">"NO2"</span><span class="p">,</span> <span class="n">co</span><span class="o">.</span><span class="s2">"CO"</span><span class="p">,</span> <span class="n">so2</span><span class="o">.</span><span class="s2">"SO2"</span><span class="p">,</span> <span class="n">ch4</span><span class="o">.</span><span class="s2">"CH4"</span>
+<span class="n">FROM</span> <span class="n">all_dates</span> <span class="n">d</span>
+<span class="n">LEFT</span> <span class="n">JOIN</span> <span class="n">no2</span> <span class="n">ON</span> <span class="n">d</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">no2</span><span class="o">.</span><span class="n">date</span>
+<span class="n">LEFT</span> <span class="n">JOIN</span> <span class="n">co</span> <span class="n">ON</span> <span class="n">d</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">co</span><span class="o">.</span><span class="n">date</span>
+<span class="n">LEFT</span> <span class="n">JOIN</span> <span class="n">so2</span> <span class="n">ON</span> <span class="n">d</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">so2</span><span class="o">.</span><span class="n">date</span>
+<span class="n">LEFT</span> <span class="n">JOIN</span> <span class="n">ch4</span> <span class="n">ON</span> <span class="n">d</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">ch4</span><span class="o">.</span><span class="n">date</span>
+<span class="n">ORDER</span> <span class="n">BY</span> <span class="n">d</span><span class="o">.</span><span class="n">date</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Tabel gabungan ini memiliki 365 baris (gabungan seluruh tanggal unik dari keempat tabel sumber).</p>
+<p><img alt="node knime" src="../_images/node-knime.png" /></p>
+<p>Alur kerja KNIME:</p>
+<ol class="arabic simple">
+<li><p>PostgreSQL Connector - menghubungkan KNIME ke server Aiven (host, port, database, kredensial user).</p></li>
+<li><p>DB Table Selector - memilih tabel polutan (skema public).</p></li>
+<li><p>DB Reader - menarik seluruh 365 baris ke dalam memori KNIME.</p></li>
+<li><p>Statistics - menghitung metrik statistik deskriptif untuk setiap kolom polutan.</p></li>
+</ol>
+</section>
+<section id="penjelasan-properti-statistik-knime">
+<h2>3. Penjelasan Properti Statistik KNIME<a class="headerlink" href="#penjelasan-properti-statistik-knime" title="Link to this heading">#</a></h2>
+<p><img alt="statistik knime" src="../_images/statistik-knime.png" />
+Hasil node Statistics menampilkan ringkasan untuk 4 variabel polutan:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Properti</p></th>
+<th class="head"><p>NO2</p></th>
+<th class="head"><p>CO</p></th>
+<th class="head"><p>SO2</p></th>
+<th class="head"><p>CH4</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>No. Missing</p></td>
+<td><p>159</p></td>
+<td><p>142</p></td>
+<td><p>115</p></td>
+<td><p>348</p></td>
+</tr>
+<tr class="row-odd"><td><p>Min</p></td>
+<td><p>-5.186</p></td>
+<td><p>20487.351</p></td>
+<td><p>-1563.039</p></td>
+<td><p>1785.148</p></td>
+</tr>
+<tr class="row-even"><td><p>Max</p></td>
+<td><p>83.522</p></td>
+<td><p>46903.509</p></td>
+<td><p>986.825</p></td>
+<td><p>1912.545</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mean</p></td>
+<td><p>28.035</p></td>
+<td><p>28744.913</p></td>
+<td><p>49.954</p></td>
+<td><p>1879.925</p></td>
+</tr>
+<tr class="row-even"><td><p>Std. Deviation</p></td>
+<td><p>14.624</p></td>
+<td><p>3456.361</p></td>
+<td><p>223.781</p></td>
+<td><p>35.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sum</p></td>
+<td><p>5775.255</p></td>
+<td><p>6410115.688</p></td>
+<td><p>12488.495</p></td>
+<td><p>31958.717</p></td>
+</tr>
+<tr class="row-even"><td><p>Skewness</p></td>
+<td><p>0.513</p></td>
+<td><p>0.777</p></td>
+<td><p>-1.277</p></td>
+<td><p>-1.265</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kurtosis</p></td>
+<td><p>0.89</p></td>
+<td><p>2.777</p></td>
+<td><p>11.745</p></td>
+<td><p>1.911</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Column</strong> - nama variabel/kolom yang datanya sedang diringkas (di sini: NO2, CO, SO2, CH4).</p>
+<p><strong>Min &amp; Max</strong> - nilai terendah dan tertinggi yang tercatat pada suatu kolom. Contoh: SO2 memiliki rentang paling lebar (-1563.039 s.d. 986.825), menandakan fluktuasi harian yang cukup ekstrem dibanding polutan lain.</p>
+<p><strong>Mean</strong> - nilai rata-rata seluruh data valid pada kolom tersebut, dihitung dengan menjumlahkan seluruh nilai lalu membaginya dengan jumlah data yang tidak kosong.</p>
+<p><strong>Median</strong> - nilai tengah data setelah diurutkan (50% data berada di bawahnya, 50% di atasnya). Node Statistics KNIME tidak menampilkan nilai ini secara langsung (keterbatasan bawaan node), sehingga dihitung manual melalui query:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span> 
+    <span class="n">PERCENTILE_CONT</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="n">WITHIN</span> <span class="n">GROUP</span> <span class="p">(</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="s2">"NO2"</span><span class="p">)</span> <span class="n">AS</span> <span class="n">median_no2</span><span class="p">,</span>
+    <span class="n">PERCENTILE_CONT</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="n">WITHIN</span> <span class="n">GROUP</span> <span class="p">(</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="s2">"CO"</span><span class="p">)</span> <span class="n">AS</span> <span class="n">median_co</span><span class="p">,</span>
+    <span class="n">PERCENTILE_CONT</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="n">WITHIN</span> <span class="n">GROUP</span> <span class="p">(</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="s2">"SO2"</span><span class="p">)</span> <span class="n">AS</span> <span class="n">median_so2</span><span class="p">,</span>
+    <span class="n">PERCENTILE_CONT</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="n">WITHIN</span> <span class="n">GROUP</span> <span class="p">(</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="s2">"CH4"</span><span class="p">)</span> <span class="n">AS</span> <span class="n">median_ch4</span>
+<span class="n">FROM</span> <span class="n">polutan</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><strong>Std. Deviation (Standar Deviasi)</strong> - mengukur seberapa jauh rata-rata sebaran data dari nilai Mean-nya. Semakin tinggi nilainya, semakin lebar fluktuasi datanya. SO2 (223.781) jauh lebih fluktuatif dibanding CH4 (35.7) yang relatif stabil.</p>
+<p><strong>Variance</strong> - kuadrat dari Standar Deviasi, mengukur besaran sebaran data dalam satuan kuadrat.</p>
+<p><strong>Skewness</strong> - mengukur kemencengan/asimetri distribusi data terhadap Mean-nya.</p>
+<ul class="simple">
+<li><p>Skewness ≈ 0 → distribusi simetris</p></li>
+<li><p>Skewness &gt; 0 → ekor memanjang ke kanan (nilai ekstrem tinggi lebih sering muncul), contoh: CO (0.777)</p></li>
+<li><p>Skewness &lt; 0 → ekor memanjang ke kiri, contoh: SO2 (-1.277), CH4 (-1.265)</p></li>
+</ul>
+<p><strong>Kurtosis</strong> - mengukur ketajaman puncak dan ketebalan ekor distribusi, menunjukkan seberapa ekstrem outlier dalam data.</p>
+<ul class="simple">
+<li><p>Kurtosis ≈ 0 → distribusi normal</p></li>
+<li><p>Kurtosis &gt; 0 → puncak tajam, ekor tebal (banyak outlier ekstrem) — SO2 (11.745) paling menonjol, menandakan banyak nilai pencilan ekstrem di kedua arah</p></li>
+<li><p>Kurtosis &lt; 0 → puncak datar</p></li>
+</ul>
+<p><strong>No. Missing</strong> - jumlah sel kosong (NULL) akibat data tidak terekam pada tanggal tertentu (umumnya karena tutupan awan saat satelit melintas). CH4 memiliki proporsi missing tertinggi (348 dari 365 hari) karena syarat kualitas data yang lebih ketat pada sensor SWIR.</p>
+<p><strong>No. NaNs / No. +infinite / No. -infinite</strong> - masing-masing menghitung jumlah entri yang bernilai “Not a Number” (hasil pembagian tidak terdefinisi) dan nilai tak terhingga positif/negatif. Pada data ini, ketiganya bernilai 0 untuk seluruh polutan - menandakan tidak ada anomali komputasi selain missing value biasa.</p>
+<p><strong>Overall Sum</strong> - jumlah keseluruhan nilai pada kolom tersebut.</p>
+<p><strong>Row count</strong> - jumlah total baris dalam tabel (365, mencakup seluruh rentang tanggal 24 Agustus 2025–24 Agustus 2026).</p>
+</section>
+<section id="contoh-perhitungan-manual">
+<h2>4. Contoh Perhitungan Manual<a class="headerlink" href="#contoh-perhitungan-manual" title="Link to this heading">#</a></h2>
+<p>Contoh perhitungan manual berikut menggunakan kolom <strong>NO2</strong> (n = 206 data valid, setelah dikurangi 159 missing value dari total 365 hari).</p>
+<section id="mean">
+<h3>Mean<a class="headerlink" href="#mean" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[ \bar{x} = \frac{\sum_{i=1}^{n} x_i}{n} \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">n</span>     <span class="o">=</span> <span class="mi">206</span>
+<span class="n">Sum</span>   <span class="o">=</span> <span class="mf">5775.255</span>
+<span class="n">Mean</span>  <span class="o">=</span> <span class="mf">5775.255</span> <span class="o">/</span> <span class="mi">206</span>
+<span class="n">Mean</span>  <span class="o">=</span> <span class="mf">28.035</span>
+</pre></div>
+</div>
+</section>
+<section id="median">
+<h3>Median<a class="headerlink" href="#median" title="Link to this heading">#</a></h3>
+<p>Urutkan seluruh 206 data dari terkecil ke terbesar. Karena n = 206 (genap), Median adalah rata-rata dari 2 data di tengah (data ke-103 dan ke-104):</p>
+<div class="math notranslate nohighlight">
+\[ Median = \frac{X_{n/2} + X_{(n/2)+1}}{2} \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X_103</span>  <span class="o">=</span> <span class="mf">26.853</span>
+<span class="n">X_104</span>  <span class="o">=</span> <span class="mf">27.027</span>
+<span class="n">Median</span> <span class="o">=</span> <span class="p">(</span><span class="mf">26.853</span> <span class="o">+</span> <span class="mf">27.027</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+<span class="n">Median</span> <span class="o">=</span> <span class="mf">26.940</span>
+</pre></div>
+</div>
+</section>
+<section id="standar-deviasi-sampel">
+<h3>Standar Deviasi (Sampel)<a class="headerlink" href="#standar-deviasi-sampel" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[ s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n-1}} \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Mean = 28.035
+n - 1 = 205
+Σ(xi - Mean)² = 43591.72   (jumlah kuadrat selisih tiap data ke rata-rata)
+s = √(43591.72 / 205)
+s = √212.642
+s = 14.624
+</pre></div>
+</div>
+</section>
+<section id="variance">
+<h3>Variance<a class="headerlink" href="#variance" title="Link to this heading">#</a></h3>
+<p>Variance adalah kuadrat dari Standar Deviasi:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Variance = s²
+Variance = 14.624²
+Variance = 213.873
+</pre></div>
+</div>
+</section>
+<section id="skewness-fisher-pearson-sampel">
+<h3>Skewness (Fisher-Pearson, Sampel)<a class="headerlink" href="#skewness-fisher-pearson-sampel" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[ Skewness = \frac{n}{(n-1)(n-2)} \sum_{i=1}^{n} \left(\frac{x_i - \bar{x}}{s}\right)^3 \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>A = n / [(n-1)(n-2)]
+A = 206 / (205 × 204)
+A = 206 / 41820
+A = 0.004926
+
+B = Σ [(xi - 28.035) / 14.624]³
+B = 105.65   (jumlah dari 206 suku pangkat tiga)
+
+Skewness = A × B
+Skewness = 0.004926 × 105.65
+Skewness = 0.520
+</pre></div>
+</div>
+<p>Nilai positif (0.520) menunjukkan distribusi NO2 sedikit menceng ke kanan — ada beberapa hari dengan konsentrasi jauh lebih tinggi dari rata-rata (lihat Max = 83.522, jauh di atas Mean = 28.035), sementara nilai rendah lebih rapat di sekitar Mean.</p>
+</section>
+<section id="kurtosis-excess-sampel">
+<h3>Kurtosis (Excess, Sampel)<a class="headerlink" href="#kurtosis-excess-sampel" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[ Kurtosis = \left[ \frac{n(n+1)}{(n-1)(n-2)(n-3)} \sum \left(\frac{x_i - \bar{x}}{s}\right)^4 \right] - \frac{3(n-1)^2}{(n-2)(n-3)} \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>A = n(n+1) / [(n-1)(n-2)(n-3)]
+A = 206 × 207 / (205 × 204 × 203)
+A = 42642 / 8489260
+A = 0.005024
+
+B = Σ [(xi - 28.035) / 14.624]⁴
+B = 761.3
+
+C = 3(n-1)² / [(n-2)(n-3)]
+C = 3 × 205² / (204 × 203)
+C = 126075 / 41412
+C = 3.044
+
+Kurtosis = (A × B) - C
+Kurtosis = (0.005024 × 761.3) - 3.044
+Kurtosis = 3.824 - 3.044
+Kurtosis = 0.890
+</pre></div>
+</div>
+<p>Nilai mendekati 0 (0.890, sedikit di atas normal) menunjukkan distribusi NO2 relatif mesokurtik — tidak ada outlier ekstrem yang berlebihan, berbeda dengan SO2 yang kurtosisnya jauh lebih tinggi (11.745), menandakan SO2 memiliki lebih banyak nilai pencilan ekstrem.</p>
+</section>
+<section id="overall-sum">
+<h3>Overall Sum<a class="headerlink" href="#overall-sum" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[ Sum = \sum_{i=1}^{n} x_i \]</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sum</span> <span class="o">=</span> <span class="mf">23.906</span> <span class="o">+</span> <span class="mf">18.914</span> <span class="o">+</span> <span class="mf">47.359</span> <span class="o">+</span> <span class="mf">53.037</span> <span class="o">+</span> <span class="mf">17.220</span> <span class="o">+</span> <span class="o">...</span> <span class="p">(</span><span class="mi">206</span> <span class="n">nilai</span><span class="p">)</span>
+<span class="n">Sum</span> <span class="o">=</span> <span class="mf">5775.255</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -721,7 +1010,22 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#membaca-data-melaporkan-kondisi-aslinya">Membaca Data &amp; Melaporkan Kondisi Aslinya</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eksplorasi-data-peta">Eksplorasi Data - Peta</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eksplorasi-data-grafik-csv-per-polutan">Eksplorasi Data - Grafik &amp; CSV per Polutan</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-output">Ringkasan Output</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-pertemuan-2">Tugas - Pertemuan 2</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#memindahkan-data-csv-ke-cloud-aiven-postgresql">1. Memindahkan Data CSV ke Cloud (Aiven PostgreSQL)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#menarik-data-dari-cloud-ke-knime">2. Menarik Data dari Cloud ke KNIME</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-properti-statistik-knime">3. Penjelasan Properti Statistik KNIME</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contoh-perhitungan-manual">4. Contoh Perhitungan Manual</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mean">Mean</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#median">Median</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#standar-deviasi-sampel">Standar Deviasi (Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#variance">Variance</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skewness-fisher-pearson-sampel">Skewness (Fisher-Pearson, Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kurtosis-excess-sampel">Kurtosis (Excess, Sampel)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overall-sum">Overall Sum</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
