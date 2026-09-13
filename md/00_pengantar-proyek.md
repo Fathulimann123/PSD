@@ -440,3 +440,314 @@ $$ Sum = \sum_{i=1}^{n} x_i $$
 Sum = 23.906 + 18.914 + 47.359 + 53.037 + 17.220 + ... (206 nilai)
 Sum = 5775.255
 ```
+# Tugas Pertemuan 3 
+
+## 1. Perubahan Cakupan Wilayah
+
+Sebagai tindak lanjut instruksi tugas terbaru, cakupan wilayah dipersempit dari tingkat kabupaten (Bangkalan) menjadi tingkat **kecamatan (Burneh)**, dengan syarat wilayah harus unik dan tidak sama dengan yang dipakai mahasiswa lain. Analisis juga dipersempit hanya pada satu polutan, yaitu **CO (Karbon Monoksida)**.
+
+Wilayah kecamatan Burneh direpresentasikan menggunakan polygon (bukan sekadar bounding box kotak) agar cakupan spasialnya lebih presisi mengikuti bentuk asli kecamatan:
+
+![burneh](../img/udara/burneh.png)
+
+```python
+geojson_data = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"name": "Kecamatan Burneh"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [112.7752359, -7.0296739],
+            [112.7753502, -7.0574764],
+            [112.7918155, -7.0574764],
+            [112.8101103, -7.0582708],
+            [112.8091829, -7.0303462],
+            [112.7912902, -7.0297912],
+            [112.7752359, -7.0296739]
+          ]
+        ]
+      }
+    }
+  ]
+}
+polygon = geojson_data["features"][0]["geometry"]
+```
+
+## 2. Crawling Ulang Data CO
+
+Data CO diunduh ulang dari Copernicus Data Space Ecosystem menggunakan openEO, dengan `spatial_extent` berupa polygon kecamatan Burneh (bukan bounding box kabupaten seperti sebelumnya), periode tetap 24 Agustus 2025 - 24 Agustus 2026.
+
+```python
+import openeo
+import netCDF4
+import numpy as np
+import pandas as pd
+
+connection = openeo.connect("openeo.dataspace.copernicus.eu")
+connection.authenticate_oidc()
+
+periode = ["2025-08-24", "2026-08-24"]
+
+cube = connection.load_collection(
+    "SENTINEL_5P_L2",
+    temporal_extent=periode,
+    spatial_extent=polygon,
+    bands=["CO"],
+)
+cube_daily = cube.aggregate_temporal_period(reducer="mean", period="day")
+cube_daily.execute_batch(title="CO crawl Burneh", outputfile="CO_burneh.nc")
+```
+
+```python
+def nc_to_daily_raw(nc_path, band):
+    ds = netCDF4.Dataset(nc_path)
+    raw = ds.variables[band][:]
+    time = ds.variables["t"][:]
+    dates = netCDF4.num2date(time, units=ds.variables["t"].units)
+    filled = raw.astype(np.float64).filled(np.nan)
+    daily_dates = [d.strftime("%Y-%m-%d") for d in dates]
+    daily_values = [float(np.nanmean(filled[i])) for i in range(filled.shape[0])]
+    df = pd.DataFrame({"date": daily_dates, band: daily_values})
+    df["date"] = pd.to_datetime(df["date"])
+    return df.set_index("date")
+
+df_co = nc_to_daily_raw("CO_burneh.nc", "CO")
+df_co.to_csv("co_burneh_raw.csv")
+```
+
+Data direindex ke kalender penuh 366 hari (24 Agustus 2025 - 24 Agustus 2026) agar seluruh tanggal tercakup, termasuk yang tidak tercatat sama sekali oleh satelit:
+
+```python
+full_range = pd.date_range(start="2025-08-24", end="2026-08-24", freq="D")
+df_co = df_co.reindex(full_range)
+df_co.index.name = "date"
+
+print(f"Total hari: {len(df_co)}")
+print(f"Data asli (tidak kosong): {df_co['CO'].notna().sum()}")
+print(f"Data kosong: {df_co['CO'].isna().sum()}")
+```
+
+**Hasil identifikasi missing value:** 204 dari 366 hari kosong (55.7%). Persentase ini lebih tinggi dibanding pengamatan sebelumnya pada cakupan kabupaten, karena area kecamatan yang lebih sempit membuat satu kejadian tutupan awan berpotensi menutupi seluruh area pengamatan sekaligus.
+
+## 3. Imputasi Missing Value
+
+Karena proporsi missing value sangat besar (55.7%, jauh di atas 50%), metode interpolasi linier sederhana dipertimbangkan ulang. Interpolasi linier hanya cocok untuk kekosongan pendek (1-3 hari berurutan); pada kekosongan panjang (berminggu-minggu), metode ini menghasilkan segmen data yang datar secara artifisial, menghilangkan karakteristik fluktuasi harian CO yang sebenarnya dipengaruhi pola aktivitas transportasi/industri harian dan mingguan.
+
+Dua metode dijalankan untuk perbandingan:
+
+```python
+import matplotlib.pyplot as plt
+
+# Metode 1: Interpolasi Linear (pembanding)
+df_co_linear = df_co.copy()
+df_co_linear["CO"] = df_co_linear["CO"].interpolate(method="time", limit_direction="both")
+df_co_linear.to_csv("co_burneh_imputed_linear.csv")
+
+# Metode 2: Seasonal/Kalender Imputation (FINAL)
+df_co_seasonal = df_co.copy()
+df_co_seasonal["CO"] = df_co_seasonal["CO"].fillna(
+    df_co_seasonal.groupby(df_co_seasonal.index.dayofweek)["CO"].transform("mean")
+)
+df_co_seasonal["CO"] = df_co_seasonal["CO"].interpolate(method="time", limit_direction="both")
+df_co_seasonal.to_csv("co_burneh_imputed_seasonal.csv")
+
+print(f"Linear   - missing tersisa: {df_co_linear['CO'].isna().sum()}")
+print(f"Seasonal - missing tersisa: {df_co_seasonal['CO'].isna().sum()}")
+
+fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+axes[0].plot(df_co_linear.index, df_co_linear["CO"], linewidth=1, color="gray")
+axes[0].set_title("Metode 1: Interpolasi Linear (pembanding)")
+axes[0].set_ylabel("CO")
+axes[1].plot(df_co_seasonal.index, df_co_seasonal["CO"], linewidth=1, color="steelblue")
+axes[1].set_title("Metode 2: Seasonal/Kalender Imputation (FINAL)")
+axes[1].set_ylabel("CO")
+axes[1].set_xlabel("Tanggal")
+plt.tight_layout()
+plt.savefig("perbandingan_imputasi_co.png", dpi=150)
+plt.show()
+```
+![burneh](../img/udara/imputasi.png)
+
+**Metode final: Seasonal/Kalender Imputation.** Nilai kosong ditambal menggunakan rata-rata dari hari-dalam-minggu yang sama (misal: Senin yang kosong diisi rata-rata seluruh hari Senin lain yang datanya tersedia), sehingga karakteristik pola mingguan CO (hari kerja vs akhir pekan) tetap terjaga. Perbandingan visual menunjukkan perbedaan yang jelas pada periode dengan kekosongan beruntun panjang (sekitar akhir Oktober - pertengahan November 2025): metode interpolasi linier menghasilkan segmen datar secara artifisial pada periode tersebut, sedangkan metode seasonal tetap mempertahankan variasi harian yang konsisten dengan pola di bagian data lain. Hasil akhir: 0 missing value dari 366 hari.
+
+## 4. Deteksi & Perbaikan Outlier
+
+**Catatan metodologis penting:** deteksi outlier awal yang dilakukan pada seluruh 366 hari (termasuk 204 hari hasil imputasi) menghasilkan 55 titik terdeteksi sebagai outlier. Namun, pendekatan ini keliru: nilai hasil imputasi seasonal bersifat sangat seragam (over-smoothing), sehingga mendominasi perhitungan kuartil dan membuat rentang IQR menjadi sangat sempit. Akibatnya, data asli yang variasinya alami justru salah terdeteksi sebagai outlier, padahal yang menyimpang sebenarnya adalah dominasi data hasil tambalan.
+
+**Metode final (Subset-Based IQR):** deteksi outlier diisolasi hanya pada data asli (162 hari yang benar-benar tercatat satelit), tidak mencampurkan data hasil imputasi ke dalam perhitungan kuartil.
+
+```python
+data_asli = df_co[df_co["CO"].notna()]
+
+Q1_asli = data_asli["CO"].quantile(0.25)
+Q3_asli = data_asli["CO"].quantile(0.75)
+IQR_asli = Q3_asli - Q1_asli
+batas_bawah_asli = Q1_asli - 1.5 * IQR_asli
+batas_atas_asli = Q3_asli + 1.5 * IQR_asli
+
+outlier_asli_mask = (data_asli["CO"] < batas_bawah_asli) | (data_asli["CO"] > batas_atas_asli)
+
+print(f"Q1={Q1_asli:.4f}, Q3={Q3_asli:.4f}, IQR={IQR_asli:.4f}")
+print(f"Batas bawah={batas_bawah_asli:.4f}, Batas atas={batas_atas_asli:.4f}")
+print(f"Jumlah outlier sejati: {outlier_asli_mask.sum()} dari {len(data_asli)} data asli")
+print(data_asli[outlier_asli_mask])
+```
+
+**Hasil:** Q1 = 0.0262, Q3 = 0.0315, IQR = 0.0054, batas bawah = 0.0181, batas atas = 0.0395. Ditemukan **1 outlier sejati**: tanggal 2025-10-07 dengan nilai 0.046827.
+
+Outlier diperbaiki menggunakan **capping (winsorization)** — nilai yang melebihi batas digantikan dengan nilai batas terdekat, kemudian digabungkan kembali dengan data hasil imputasi seasonal menjadi variabel final `df_co_fixed`.
+
+```python
+data_asli_clean = data_asli.copy()
+data_asli_clean["CO"] = data_asli_clean["CO"].clip(lower=batas_bawah_asli, upper=batas_atas_asli)
+
+df_co_fixed = df_co_seasonal.copy()
+df_co_fixed.update(data_asli_clean)
+
+print(f"df_co_fixed - missing: {df_co_fixed['CO'].isna().sum()}, total hari: {len(df_co_fixed)}")
+df_co_fixed.to_csv("co_burneh_fixed.csv")
+```
+
+**Hasil akhir:** `df_co_fixed` — 366 hari, 0 missing value, 0 outlier ekstrem, siap digunakan sebagai input ekstraksi fitur.
+
+## 5. Ekstraksi Fitur menggunakan TSFEL
+
+Fitur time series diekstrak dari 366 hari data CO yang telah bersih (`df_co_fixed`) menggunakan library TSFEL. ekstraksi dilakukan dengan memanggil setiap dari 68 fungsi fitur TSFEL secara langsung dan merapikan hasilnya menjadi satu nilai skalar per fitur.
+
+```python
+import pandas as pd
+import numpy as np
+import inspect
+import tsfel.feature_extraction.features as tsfel_features
+
+target_pollutant = "CO"
+df_co_fixed[target_pollutant] = pd.to_numeric(df_co_fixed[target_pollutant], errors="coerce")
+signal_1d = df_co_fixed[target_pollutant].astype(float).values
+fs = 1
+
+FEATURE_LIST = """abs_energy auc autocorr average_power calc_centroid calc_max calc_mean
+calc_median calc_min calc_std calc_var dfa distance ecdf ecdf_percentile ecdf_percentile_count
+ecdf_slope entropy fundamental_frequency higuchi_fractal_dimension hist_mode human_range_energy
+hurst_exponent interq_range kurtosis lempel_ziv lpcc max_frequency max_power_spectrum
+maximum_fractal_length mean_abs_deviation mean_abs_diff mean_diff median_abs_deviation
+median_abs_diff median_diff median_frequency mfcc mse negative_turning neighbourhood_peaks
+petrosian_fractal_dimension pk_pk_distance positive_turning power_bandwidth rms skewness slope
+spectral_centroid spectral_decrease spectral_distance spectral_entropy spectral_kurtosis
+spectral_positive_turning spectral_roll_off spectral_roll_on spectral_skewness spectral_slope
+spectral_spread spectral_variation spectrogram_mean_coeff sum_abs_diff wavelet_abs_mean
+wavelet_energy wavelet_entropy wavelet_std wavelet_var zero_cross""".split()
+
+def to_scalar(result):
+    if isinstance(result, dict) and "values" in result:
+        result = result["values"]
+    if isinstance(result, (list, tuple, np.ndarray)):
+        return float(np.nanmean(np.asarray(result, dtype=float)))
+    return float(result)
+
+def extract_one(fn_name, signal, fs):
+    fn = getattr(tsfel_features, fn_name)
+    params = inspect.signature(fn).parameters
+    return to_scalar(fn(signal, fs) if "fs" in params else fn(signal))
+
+row = {fn_name: extract_one(fn_name, signal_1d, fs) for fn_name in FEATURE_LIST}
+fitur_co_final = pd.DataFrame([row])
+
+print(f"Jumlah fitur yang diekstrak: {fitur_co_final.shape[1]}")
+fitur_co_final.to_csv("CO_burneh_TSFEL.csv", index=False)
+```
+|index|abs\_energy|auc|autocorr|average\_power|calc\_centroid|calc\_max|calc\_mean|calc\_median|calc\_min|calc\_std|calc\_var|dfa|distance|ecdf|ecdf\_percentile|ecdf\_percentile\_count|ecdf\_slope|entropy|fundamental\_frequency|higuchi\_fractal\_dimension|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|0|0\.3057765219540027|10\.51327587688876|1\.0|0\.0008377438957643|181\.14325128787507|0\.0395294411573559|0\.0287929115671036|0\.0291458663895078|0\.0199626348912715|0\.0025344075255071|6\.423221505347478e-06|0\.6626065277451716|365\.0020862679126|0\.0150273224043715|0\.0285519167026948|182\.5|665\.4464873178209|0\.68129178750609|0\.0027322404371584|2\.0055890472360893|
+
+**Hasil:** 68 fitur berhasil diekstrak dalam satu baris (1 nilai per fitur), mencakup domain Statistical, Temporal, dan Spectral. Fitur `ecdf_slope` yang pada percobaan awal perlu dihitung manual, ternyata tersedia sebagai fungsi langsung di modul TSFEL dan dapat dipanggil seperti fitur lainnya.
+
+## 6. Penjelasan Domain dan Fitur TSFEL
+
+TSFEL mengelompokkan fitur deret waktu ke dalam tiga domain utama: **Statistical** (mendeskripsikan sebaran nilai tanpa memperhatikan urutan waktu), **Temporal** (mendeskripsikan pola dan perilaku sinyal sepanjang waktu), dan **Spectral** (mendeskripsikan sinyal setelah ditransformasikan ke ranah frekuensi). Berikut penjelasan setiap fitur yang berhasil diekstrak dari data CO.
+
+### Domain Statistical
+
+Domain ini merangkum karakteristik distribusi nilai CO secara keseluruhan, tanpa mempedulikan kapan nilai itu muncul.
+
+- **calc_min, calc_max**: nilai terendah dan tertinggi yang tercatat pada deret data.
+- **calc_mean**: rata-rata seluruh nilai, dihitung dengan menjumlahkan semua data lalu membagi dengan jumlah data.
+- **calc_median**: nilai tengah setelah data diurutkan.
+- **calc_std, calc_var**: standar deviasi dan variansnya, mengukur seberapa lebar sebaran nilai di sekitar rata-rata.
+- **skewness**: mengukur kemiringan distribusi (condong ke kiri atau kanan terhadap rata-rata).
+- **kurtosis**: mengukur ketajaman puncak dan ketebalan ekor distribusi, menandakan seberapa sering muncul nilai ekstrem.
+- **interq_range**: rentang interkuartil (Q3 dikurangi Q1), ukuran sebaran yang tidak terlalu terpengaruh outlier.
+- **mean_abs_deviation**: rata-rata dari selisih absolut tiap nilai terhadap rata-rata keseluruhan.
+- **median_abs_deviation**: sama seperti di atas, tetapi dihitung terhadap median, sehingga lebih tahan terhadap outlier.
+- **rms (root mean square)**: akar dari rata-rata kuadrat seluruh nilai, mencerminkan besaran energi rata-rata sinyal.
+- **hist_mode**: nilai yang paling sering muncul (modus) ketika data dikelompokkan ke dalam histogram.
+- **ecdf**: nilai fungsi distribusi kumulatif empiris (Empirical Cumulative Distribution Function), menggambarkan proporsi data yang berada di bawah suatu nilai tertentu.
+- **ecdf_percentile**: nilai ECDF pada persentil tertentu (mis. 25% dan 75%).
+- **ecdf_percentile_count**: jumlah titik data yang berada di bawah suatu persentil ECDF tertentu.
+- **ecdf_slope**: kemiringan garis ECDF antara dua titik persentil, mencerminkan seberapa cepat distribusi data naik pada rentang tersebut.
+
+### Domain Temporal
+
+Domain ini menilai bagaimana nilai CO berubah dan berpola sepanjang waktu, termasuk tren, kompleksitas, dan tingkat keteraturan sinyal.
+
+- **abs_energy**: total energi sinyal, dihitung dari jumlah kuadrat seluruh nilai.
+- **auc (area under curve)**: luas area di bawah kurva deret waktu.
+- **average_power**: rata-rata daya sinyal terhadap waktu (energi dibagi durasi).
+- **autocorr**: autokorelasi, mengukur seberapa mirip sinyal dengan versi tergesernya sendiri (misal, apakah nilai hari ini berkorelasi dengan nilai kemarin).
+- **calc_centroid**: titik pusat massa sinyal di sepanjang sumbu waktu.
+- **distance**: total panjang lintasan yang ditempuh sinyal dari titik pertama ke titik terakhir.
+- **entropy**: mengukur tingkat ketidakteraturan atau ketidakpastian pola dalam sinyal; makin acak, makin tinggi entropinya.
+- **slope**: kemiringan garis tren linear yang paling mendekati keseluruhan data (naik atau turun secara umum).
+- **mean_diff, median_diff**: rata-rata dan median dari selisih antar nilai berurutan (menunjukkan laju perubahan harian).
+- **mean_abs_diff, median_abs_diff**: sama seperti di atas, tetapi menggunakan nilai absolut sehingga arah naik/turun tidak saling meniadakan.
+- **sum_abs_diff**: total akumulasi dari seluruh selisih absolut antar hari.
+- **mse (mean squared error)**: rata-rata kuadrat selisih antara sinyal dan model referensinya.
+- **negative_turning, positive_turning**: jumlah titik balik di mana tren berubah dari naik ke turun, atau dari turun ke naik.
+- **neighbourhood_peaks**: jumlah titik puncak lokal yang terdeteksi dalam suatu jendela pengamatan.
+- **pk_pk_distance (peak-to-peak distance)**: selisih antara nilai puncak tertinggi dan lembah terendah.
+- **zero_cross**: jumlah kali sinyal melewati garis nol (atau nilai tengah tertentu).
+- **dfa (detrended fluctuation analysis)**: mengukur ketergantungan jangka panjang dalam data setelah tren dihilangkan.
+- **hurst_exponent**: menunjukkan apakah pola naik-turun cenderung berlanjut (memori jangka panjang) atau acak.
+- **higuchi_fractal_dimension, petrosian_fractal_dimension** — dua cara berbeda mengukur seberapa kompleks/bergeriginya bentuk sinyal secara matematis.
+- **maximum_fractal_length**: panjang maksimum lintasan fraktal yang teramati pada berbagai skala waktu.
+- **lempel_ziv**: mengukur kompleksitas sinyal berdasarkan seberapa banyak pola berulang yang bisa "dikompresi".
+
+### Domain Spectral
+
+Domain ini mengubah sinyal CO ke ranah frekuensi (menggunakan transformasi Fourier atau wavelet) untuk melihat pola periodik yang tidak terlihat langsung dari data mentah.
+
+- **fundamental_frequency**: frekuensi dominan/paling menonjol dalam sinyal, menandakan siklus utama yang berulang.
+- **max_frequency, median_frequency**: frekuensi tertinggi dan frekuensi tengah (median) dari distribusi daya spektrum.
+- **max_power_spectrum**: nilai daya (energi) tertinggi yang ditemukan pada frekuensi dominan.
+- **power_bandwidth**: lebar pita frekuensi tempat sebagian besar energi sinyal terkonsentrasi.
+- **human_range_energy**: proporsi energi sinyal yang berada pada rentang frekuensi tertentu yang relevan.
+- **spectral_centroid**: titik berat frekuensi; menunjukkan apakah energi lebih terkonsentrasi di frekuensi rendah atau tinggi.
+- **spectral_spread**: seberapa lebar sebaran energi di sekitar spectral centroid.
+- **spectral_skewness, spectral_kurtosis**: versi domain frekuensi dari skewness dan kurtosis, mengukur bentuk kurva distribusi daya spektrum.
+- **spectral_decrease, spectral_slope**: mengukur seberapa cepat daya spektrum menurun seiring naiknya frekuensi.
+- **spectral_distance**: ukuran perbedaan antara profil spektrum sinyal dan bentuk referensinya.
+- **spectral_entropy**: entropi pada ranah frekuensi, mengukur seberapa merata energi tersebar di berbagai frekuensi (semakin merata, semakin tinggi).
+- **spectral_positive_turning**: jumlah titik balik naik pada kurva kepadatan spektral.
+- **spectral_roll_off, spectral_roll_on**: titik frekuensi tempat sebagian besar (misalnya 95%) energi sinyal sudah terakumulasi, dilihat dari sisi atas maupun bawah spektrum.
+- **spectral_variation**: seberapa besar variasi/perubahan bentuk spektrum dari waktu ke waktu.
+- **spectrogram_mean_coeff**: rata-rata nilai koefisien dari representasi spektrogram (peta waktu-frekuensi) sinyal.
+- **lpcc (linear prediction cepstral coefficients)**: koefisien yang merepresentasikan bentuk spektral sinyal secara ringkas, umum dipakai untuk mengenali pola/tekstur frekuensi.
+- **mfcc (mel-frequency cepstral coefficients)**: mirip lpcc, representasi ringkas spektrum yang mengikuti skala frekuensi mel, sering dipakai dalam pengenalan pola sinyal.
+- **wavelet_abs_mean, wavelet_std, wavelet_var**: rata-rata mutlak, standar deviasi, dan varians dari koefisien hasil transformasi wavelet, yang memecah sinyal ke berbagai skala waktu-frekuensi sekaligus.
+- **wavelet_energy**: total energi yang terkandung dalam koefisien wavelet.
+- **wavelet_entropy**: tingkat ketidakteraturan yang terukur dari distribusi energi antar skala wavelet.
+
+## Ringkasan Alur
+
+```
+Crawling CO (polygon Kecamatan Burneh, 24 Agst 2025 - 24 Agst 2026)
+    -> df_co (366 hari, 204 kosong / 55.7%)
+    -> Imputasi: Linear (pembanding) vs Seasonal (FINAL) -> df_co_seasonal (0 kosong)
+    -> Deteksi outlier subset-based di 162 data asli -> 1 outlier sejati (2025-10-07)
+    -> Capping outlier + gabung ke df_co_seasonal -> df_co_fixed (366 hari, 0 kosong, 0 outlier)
+    -> Ekstraksi TSFEL: 67 fungsi otomatis + 1 ECDF Slope manual = 68 fungsi (157 kolom)
+    -> fitur_co_68.csv
+```

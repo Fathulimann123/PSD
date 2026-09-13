@@ -225,6 +225,7 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Business Understanding</a></li>
 
 
+
 <li class="toctree-l1"><a class="reference internal" href="01_mulai-disini.html">Mulai Menulis</a></li>
 </ul>
 
@@ -443,6 +444,21 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overall-sum">Overall Sum</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-pertemuan-3">Tugas Pertemuan 3</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perubahan-cakupan-wilayah">1. Perubahan Cakupan Wilayah</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crawling-ulang-data-co">2. Crawling Ulang Data CO</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imputasi-missing-value">3. Imputasi Missing Value</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deteksi-perbaikan-outlier">4. Deteksi &amp; Perbaikan Outlier</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ekstraksi-fitur-menggunakan-tsfel">5. Ekstraksi Fitur menggunakan TSFEL</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-domain-dan-fitur-tsfel">6. Penjelasan Domain dan Fitur TSFEL</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-statistical">Domain Statistical</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-temporal">Domain Temporal</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-spectral">Domain Spectral</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-alur">Ringkasan Alur</a></li>
 </ul>
 </li>
 </ul>
@@ -934,6 +950,351 @@ Kurtosis = 0.890
 </section>
 </section>
 </section>
+<section class="tex2jax_ignore mathjax_ignore" id="tugas-pertemuan-3">
+<h1>Tugas Pertemuan 3<a class="headerlink" href="#tugas-pertemuan-3" title="Link to this heading">#</a></h1>
+<section id="perubahan-cakupan-wilayah">
+<h2>1. Perubahan Cakupan Wilayah<a class="headerlink" href="#perubahan-cakupan-wilayah" title="Link to this heading">#</a></h2>
+<p>Sebagai tindak lanjut instruksi tugas terbaru, cakupan wilayah dipersempit dari tingkat kabupaten (Bangkalan) menjadi tingkat <strong>kecamatan (Burneh)</strong>, dengan syarat wilayah harus unik dan tidak sama dengan yang dipakai mahasiswa lain. Analisis juga dipersempit hanya pada satu polutan, yaitu <strong>CO (Karbon Monoksida)</strong>.</p>
+<p>Wilayah kecamatan Burneh direpresentasikan menggunakan polygon (bukan sekadar bounding box kotak) agar cakupan spasialnya lebih presisi mengikuti bentuk asli kecamatan:</p>
+<p><img alt="burneh" src="../_images/burneh.png" /></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">geojson_data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"FeatureCollection"</span><span class="p">,</span>
+  <span class="s2">"features"</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"Feature"</span><span class="p">,</span>
+      <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Kecamatan Burneh"</span><span class="p">},</span>
+      <span class="s2">"geometry"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"Polygon"</span><span class="p">,</span>
+        <span class="s2">"coordinates"</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span>
+            <span class="p">[</span><span class="mf">112.7752359</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0296739</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.7753502</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0574764</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.7918155</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0574764</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.8101103</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0582708</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.8091829</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0303462</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.7912902</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0297912</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">112.7752359</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.0296739</span><span class="p">]</span>
+          <span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+<span class="n">polygon</span> <span class="o">=</span> <span class="n">geojson_data</span><span class="p">[</span><span class="s2">"features"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">"geometry"</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="crawling-ulang-data-co">
+<h2>2. Crawling Ulang Data CO<a class="headerlink" href="#crawling-ulang-data-co" title="Link to this heading">#</a></h2>
+<p>Data CO diunduh ulang dari Copernicus Data Space Ecosystem menggunakan openEO, dengan <code class="docutils literal notranslate"><span class="pre">spatial_extent</span></code> berupa polygon kecamatan Burneh (bukan bounding box kabupaten seperti sebelumnya), periode tetap 24 Agustus 2025 - 24 Agustus 2026.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">openeo</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">netCDF4</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">connection</span> <span class="o">=</span> <span class="n">openeo</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"openeo.dataspace.copernicus.eu"</span><span class="p">)</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">authenticate_oidc</span><span class="p">()</span>
+
+<span class="n">periode</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"2025-08-24"</span><span class="p">,</span> <span class="s2">"2026-08-24"</span><span class="p">]</span>
+
+<span class="n">cube</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">load_collection</span><span class="p">(</span>
+    <span class="s2">"SENTINEL_5P_L2"</span><span class="p">,</span>
+    <span class="n">temporal_extent</span><span class="o">=</span><span class="n">periode</span><span class="p">,</span>
+    <span class="n">spatial_extent</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+    <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">cube_daily</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">aggregate_temporal_period</span><span class="p">(</span><span class="n">reducer</span><span class="o">=</span><span class="s2">"mean"</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s2">"day"</span><span class="p">)</span>
+<span class="n">cube_daily</span><span class="o">.</span><span class="n">execute_batch</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"CO crawl Burneh"</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="s2">"CO_burneh.nc"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">nc_to_daily_raw</span><span class="p">(</span><span class="n">nc_path</span><span class="p">,</span> <span class="n">band</span><span class="p">):</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">nc_path</span><span class="p">)</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">band</span><span class="p">][:]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">"t"</span><span class="p">][:]</span>
+    <span class="n">dates</span> <span class="o">=</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">"t"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+    <span class="n">filled</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">daily_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">]</span>
+    <span class="n">daily_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">filled</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"date"</span><span class="p">:</span> <span class="n">daily_dates</span><span class="p">,</span> <span class="n">band</span><span class="p">:</span> <span class="n">daily_values</span><span class="p">})</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"date"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"date"</span><span class="p">)</span>
+
+<span class="n">df_co</span> <span class="o">=</span> <span class="n">nc_to_daily_raw</span><span class="p">(</span><span class="s2">"CO_burneh.nc"</span><span class="p">,</span> <span class="s2">"CO"</span><span class="p">)</span>
+<span class="n">df_co</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"co_burneh_raw.csv"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Data direindex ke kalender penuh 366 hari (24 Agustus 2025 - 24 Agustus 2026) agar seluruh tanggal tercakup, termasuk yang tidak tercatat sama sekali oleh satelit:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">full_range</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s2">"2025-08-24"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">"2026-08-24"</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">"D"</span><span class="p">)</span>
+<span class="n">df_co</span> <span class="o">=</span> <span class="n">df_co</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">full_range</span><span class="p">)</span>
+<span class="n">df_co</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"date"</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total hari: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_co</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Data asli (tidak kosong): </span><span class="si">{</span><span class="n">df_co</span><span class="p">[</span><span class="s1">'CO'</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Data kosong: </span><span class="si">{</span><span class="n">df_co</span><span class="p">[</span><span class="s1">'CO'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Hasil identifikasi missing value:</strong> 204 dari 366 hari kosong (55.7%). Persentase ini lebih tinggi dibanding pengamatan sebelumnya pada cakupan kabupaten, karena area kecamatan yang lebih sempit membuat satu kejadian tutupan awan berpotensi menutupi seluruh area pengamatan sekaligus.</p>
+</section>
+<section id="imputasi-missing-value">
+<h2>3. Imputasi Missing Value<a class="headerlink" href="#imputasi-missing-value" title="Link to this heading">#</a></h2>
+<p>Karena proporsi missing value sangat besar (55.7%, jauh di atas 50%), metode interpolasi linier sederhana dipertimbangkan ulang. Interpolasi linier hanya cocok untuk kekosongan pendek (1-3 hari berurutan); pada kekosongan panjang (berminggu-minggu), metode ini menghasilkan segmen data yang datar secara artifisial, menghilangkan karakteristik fluktuasi harian CO yang sebenarnya dipengaruhi pola aktivitas transportasi/industri harian dan mingguan.</p>
+<p>Dua metode dijalankan untuk perbandingan:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Metode 1: Interpolasi Linear (pembanding)</span>
+<span class="n">df_co_linear</span> <span class="o">=</span> <span class="n">df_co</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_co_linear</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_co_linear</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"time"</span><span class="p">,</span> <span class="n">limit_direction</span><span class="o">=</span><span class="s2">"both"</span><span class="p">)</span>
+<span class="n">df_co_linear</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"co_burneh_imputed_linear.csv"</span><span class="p">)</span>
+
+<span class="c1"># Metode 2: Seasonal/Kalender Imputation (FINAL)</span>
+<span class="n">df_co_seasonal</span> <span class="o">=</span> <span class="n">df_co</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_co_seasonal</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_co_seasonal</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span>
+    <span class="n">df_co_seasonal</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df_co_seasonal</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">dayofweek</span><span class="p">)[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">"mean"</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">df_co_seasonal</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_co_seasonal</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"time"</span><span class="p">,</span> <span class="n">limit_direction</span><span class="o">=</span><span class="s2">"both"</span><span class="p">)</span>
+<span class="n">df_co_seasonal</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"co_burneh_imputed_seasonal.csv"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Linear   - missing tersisa: </span><span class="si">{</span><span class="n">df_co_linear</span><span class="p">[</span><span class="s1">'CO'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Seasonal - missing tersisa: </span><span class="si">{</span><span class="n">df_co_seasonal</span><span class="p">[</span><span class="s1">'CO'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df_co_linear</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_co_linear</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Metode 1: Interpolasi Linear (pembanding)"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"CO"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df_co_seasonal</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">df_co_seasonal</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"steelblue"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Metode 2: Seasonal/Kalender Imputation (FINAL)"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"CO"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Tanggal"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"perbandingan_imputasi_co.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><img alt="burneh" src="../_images/imputasi.png" /></p>
+<p><strong>Metode final: Seasonal/Kalender Imputation.</strong> Nilai kosong ditambal menggunakan rata-rata dari hari-dalam-minggu yang sama (misal: Senin yang kosong diisi rata-rata seluruh hari Senin lain yang datanya tersedia), sehingga karakteristik pola mingguan CO (hari kerja vs akhir pekan) tetap terjaga. Perbandingan visual menunjukkan perbedaan yang jelas pada periode dengan kekosongan beruntun panjang (sekitar akhir Oktober - pertengahan November 2025): metode interpolasi linier menghasilkan segmen datar secara artifisial pada periode tersebut, sedangkan metode seasonal tetap mempertahankan variasi harian yang konsisten dengan pola di bagian data lain. Hasil akhir: 0 missing value dari 366 hari.</p>
+</section>
+<section id="deteksi-perbaikan-outlier">
+<h2>4. Deteksi &amp; Perbaikan Outlier<a class="headerlink" href="#deteksi-perbaikan-outlier" title="Link to this heading">#</a></h2>
+<p><strong>Catatan metodologis penting:</strong> deteksi outlier awal yang dilakukan pada seluruh 366 hari (termasuk 204 hari hasil imputasi) menghasilkan 55 titik terdeteksi sebagai outlier. Namun, pendekatan ini keliru: nilai hasil imputasi seasonal bersifat sangat seragam (over-smoothing), sehingga mendominasi perhitungan kuartil dan membuat rentang IQR menjadi sangat sempit. Akibatnya, data asli yang variasinya alami justru salah terdeteksi sebagai outlier, padahal yang menyimpang sebenarnya adalah dominasi data hasil tambalan.</p>
+<p><strong>Metode final (Subset-Based IQR):</strong> deteksi outlier diisolasi hanya pada data asli (162 hari yang benar-benar tercatat satelit), tidak mencampurkan data hasil imputasi ke dalam perhitungan kuartil.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_asli</span> <span class="o">=</span> <span class="n">df_co</span><span class="p">[</span><span class="n">df_co</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
+
+<span class="n">Q1_asli</span> <span class="o">=</span> <span class="n">data_asli</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">Q3_asli</span> <span class="o">=</span> <span class="n">data_asli</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="n">IQR_asli</span> <span class="o">=</span> <span class="n">Q3_asli</span> <span class="o">-</span> <span class="n">Q1_asli</span>
+<span class="n">batas_bawah_asli</span> <span class="o">=</span> <span class="n">Q1_asli</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR_asli</span>
+<span class="n">batas_atas_asli</span> <span class="o">=</span> <span class="n">Q3_asli</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR_asli</span>
+
+<span class="n">outlier_asli_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_asli</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">batas_bawah_asli</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_asli</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">batas_atas_asli</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Q1=</span><span class="si">{</span><span class="n">Q1_asli</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Q3=</span><span class="si">{</span><span class="n">Q3_asli</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, IQR=</span><span class="si">{</span><span class="n">IQR_asli</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Batas bawah=</span><span class="si">{</span><span class="n">batas_bawah_asli</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Batas atas=</span><span class="si">{</span><span class="n">batas_atas_asli</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Jumlah outlier sejati: </span><span class="si">{</span><span class="n">outlier_asli_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> dari </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_asli</span><span class="p">)</span><span class="si">}</span><span class="s2"> data asli"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_asli</span><span class="p">[</span><span class="n">outlier_asli_mask</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>Hasil:</strong> Q1 = 0.0262, Q3 = 0.0315, IQR = 0.0054, batas bawah = 0.0181, batas atas = 0.0395. Ditemukan <strong>1 outlier sejati</strong>: tanggal 2025-10-07 dengan nilai 0.046827.</p>
+<p>Outlier diperbaiki menggunakan <strong>capping (winsorization)</strong> — nilai yang melebihi batas digantikan dengan nilai batas terdekat, kemudian digabungkan kembali dengan data hasil imputasi seasonal menjadi variabel final <code class="docutils literal notranslate"><span class="pre">df_co_fixed</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_asli_clean</span> <span class="o">=</span> <span class="n">data_asli</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">data_asli_clean</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_asli_clean</span><span class="p">[</span><span class="s2">"CO"</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="n">batas_bawah_asli</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">batas_atas_asli</span><span class="p">)</span>
+
+<span class="n">df_co_fixed</span> <span class="o">=</span> <span class="n">df_co_seasonal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_co_fixed</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data_asli_clean</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"df_co_fixed - missing: </span><span class="si">{</span><span class="n">df_co_fixed</span><span class="p">[</span><span class="s1">'CO'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">, total hari: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_co_fixed</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">df_co_fixed</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"co_burneh_fixed.csv"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Hasil akhir:</strong> <code class="docutils literal notranslate"><span class="pre">df_co_fixed</span></code> — 366 hari, 0 missing value, 0 outlier ekstrem, siap digunakan sebagai input ekstraksi fitur.</p>
+</section>
+<section id="ekstraksi-fitur-menggunakan-tsfel">
+<h2>5. Ekstraksi Fitur menggunakan TSFEL<a class="headerlink" href="#ekstraksi-fitur-menggunakan-tsfel" title="Link to this heading">#</a></h2>
+<p>Fitur time series diekstrak dari 366 hari data CO yang telah bersih (<code class="docutils literal notranslate"><span class="pre">df_co_fixed</span></code>) menggunakan library TSFEL. ekstraksi dilakukan dengan memanggil setiap dari 68 fungsi fitur TSFEL secara langsung dan merapikan hasilnya menjadi satu nilai skalar per fitur.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tsfel.feature_extraction.features</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tsfel_features</span>
+
+<span class="n">target_pollutant</span> <span class="o">=</span> <span class="s2">"CO"</span>
+<span class="n">df_co_fixed</span><span class="p">[</span><span class="n">target_pollutant</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df_co_fixed</span><span class="p">[</span><span class="n">target_pollutant</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span>
+<span class="n">signal_1d</span> <span class="o">=</span> <span class="n">df_co_fixed</span><span class="p">[</span><span class="n">target_pollutant</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">FEATURE_LIST</span> <span class="o">=</span> <span class="s2">"""abs_energy auc autocorr average_power calc_centroid calc_max calc_mean</span>
+<span class="s2">calc_median calc_min calc_std calc_var dfa distance ecdf ecdf_percentile ecdf_percentile_count</span>
+<span class="s2">ecdf_slope entropy fundamental_frequency higuchi_fractal_dimension hist_mode human_range_energy</span>
+<span class="s2">hurst_exponent interq_range kurtosis lempel_ziv lpcc max_frequency max_power_spectrum</span>
+<span class="s2">maximum_fractal_length mean_abs_deviation mean_abs_diff mean_diff median_abs_deviation</span>
+<span class="s2">median_abs_diff median_diff median_frequency mfcc mse negative_turning neighbourhood_peaks</span>
+<span class="s2">petrosian_fractal_dimension pk_pk_distance positive_turning power_bandwidth rms skewness slope</span>
+<span class="s2">spectral_centroid spectral_decrease spectral_distance spectral_entropy spectral_kurtosis</span>
+<span class="s2">spectral_positive_turning spectral_roll_off spectral_roll_on spectral_skewness spectral_slope</span>
+<span class="s2">spectral_spread spectral_variation spectrogram_mean_coeff sum_abs_diff wavelet_abs_mean</span>
+<span class="s2">wavelet_energy wavelet_entropy wavelet_std wavelet_var zero_cross"""</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">to_scalar</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"values"</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_one</span><span class="p">(</span><span class="n">fn_name</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tsfel_features</span><span class="p">,</span> <span class="n">fn_name</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="k">return</span> <span class="n">to_scalar</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"fs"</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="n">fn</span><span class="p">(</span><span class="n">signal</span><span class="p">))</span>
+
+<span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="n">fn_name</span><span class="p">:</span> <span class="n">extract_one</span><span class="p">(</span><span class="n">fn_name</span><span class="p">,</span> <span class="n">signal_1d</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn_name</span> <span class="ow">in</span> <span class="n">FEATURE_LIST</span><span class="p">}</span>
+<span class="n">fitur_co_final</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">row</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Jumlah fitur yang diekstrak: </span><span class="si">{</span><span class="n">fitur_co_final</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">fitur_co_final</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"CO_burneh_TSFEL.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>index</p></th>
+<th class="head"><p>abs_energy</p></th>
+<th class="head"><p>auc</p></th>
+<th class="head"><p>autocorr</p></th>
+<th class="head"><p>average_power</p></th>
+<th class="head"><p>calc_centroid</p></th>
+<th class="head"><p>calc_max</p></th>
+<th class="head"><p>calc_mean</p></th>
+<th class="head"><p>calc_median</p></th>
+<th class="head"><p>calc_min</p></th>
+<th class="head"><p>calc_std</p></th>
+<th class="head"><p>calc_var</p></th>
+<th class="head"><p>dfa</p></th>
+<th class="head"><p>distance</p></th>
+<th class="head"><p>ecdf</p></th>
+<th class="head"><p>ecdf_percentile</p></th>
+<th class="head"><p>ecdf_percentile_count</p></th>
+<th class="head"><p>ecdf_slope</p></th>
+<th class="head"><p>entropy</p></th>
+<th class="head"><p>fundamental_frequency</p></th>
+<th class="head"><p>higuchi_fractal_dimension</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0.3057765219540027</p></td>
+<td><p>10.51327587688876</p></td>
+<td><p>1.0</p></td>
+<td><p>0.0008377438957643</p></td>
+<td><p>181.14325128787507</p></td>
+<td><p>0.0395294411573559</p></td>
+<td><p>0.0287929115671036</p></td>
+<td><p>0.0291458663895078</p></td>
+<td><p>0.0199626348912715</p></td>
+<td><p>0.0025344075255071</p></td>
+<td><p>6.423221505347478e-06</p></td>
+<td><p>0.6626065277451716</p></td>
+<td><p>365.0020862679126</p></td>
+<td><p>0.0150273224043715</p></td>
+<td><p>0.0285519167026948</p></td>
+<td><p>182.5</p></td>
+<td><p>665.4464873178209</p></td>
+<td><p>0.68129178750609</p></td>
+<td><p>0.0027322404371584</p></td>
+<td><p>2.0055890472360893</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Hasil:</strong> 68 fitur berhasil diekstrak dalam satu baris (1 nilai per fitur), mencakup domain Statistical, Temporal, dan Spectral. Fitur <code class="docutils literal notranslate"><span class="pre">ecdf_slope</span></code> yang pada percobaan awal perlu dihitung manual, ternyata tersedia sebagai fungsi langsung di modul TSFEL dan dapat dipanggil seperti fitur lainnya.</p>
+</section>
+<section id="penjelasan-domain-dan-fitur-tsfel">
+<h2>6. Penjelasan Domain dan Fitur TSFEL<a class="headerlink" href="#penjelasan-domain-dan-fitur-tsfel" title="Link to this heading">#</a></h2>
+<p>TSFEL mengelompokkan fitur deret waktu ke dalam tiga domain utama: <strong>Statistical</strong> (mendeskripsikan sebaran nilai tanpa memperhatikan urutan waktu), <strong>Temporal</strong> (mendeskripsikan pola dan perilaku sinyal sepanjang waktu), dan <strong>Spectral</strong> (mendeskripsikan sinyal setelah ditransformasikan ke ranah frekuensi). Berikut penjelasan setiap fitur yang berhasil diekstrak dari data CO.</p>
+<section id="domain-statistical">
+<h3>Domain Statistical<a class="headerlink" href="#domain-statistical" title="Link to this heading">#</a></h3>
+<p>Domain ini merangkum karakteristik distribusi nilai CO secara keseluruhan, tanpa mempedulikan kapan nilai itu muncul.</p>
+<ul class="simple">
+<li><p><strong>calc_min, calc_max</strong>: nilai terendah dan tertinggi yang tercatat pada deret data.</p></li>
+<li><p><strong>calc_mean</strong>: rata-rata seluruh nilai, dihitung dengan menjumlahkan semua data lalu membagi dengan jumlah data.</p></li>
+<li><p><strong>calc_median</strong>: nilai tengah setelah data diurutkan.</p></li>
+<li><p><strong>calc_std, calc_var</strong>: standar deviasi dan variansnya, mengukur seberapa lebar sebaran nilai di sekitar rata-rata.</p></li>
+<li><p><strong>skewness</strong>: mengukur kemiringan distribusi (condong ke kiri atau kanan terhadap rata-rata).</p></li>
+<li><p><strong>kurtosis</strong>: mengukur ketajaman puncak dan ketebalan ekor distribusi, menandakan seberapa sering muncul nilai ekstrem.</p></li>
+<li><p><strong>interq_range</strong>: rentang interkuartil (Q3 dikurangi Q1), ukuran sebaran yang tidak terlalu terpengaruh outlier.</p></li>
+<li><p><strong>mean_abs_deviation</strong>: rata-rata dari selisih absolut tiap nilai terhadap rata-rata keseluruhan.</p></li>
+<li><p><strong>median_abs_deviation</strong>: sama seperti di atas, tetapi dihitung terhadap median, sehingga lebih tahan terhadap outlier.</p></li>
+<li><p><strong>rms (root mean square)</strong>: akar dari rata-rata kuadrat seluruh nilai, mencerminkan besaran energi rata-rata sinyal.</p></li>
+<li><p><strong>hist_mode</strong>: nilai yang paling sering muncul (modus) ketika data dikelompokkan ke dalam histogram.</p></li>
+<li><p><strong>ecdf</strong>: nilai fungsi distribusi kumulatif empiris (Empirical Cumulative Distribution Function), menggambarkan proporsi data yang berada di bawah suatu nilai tertentu.</p></li>
+<li><p><strong>ecdf_percentile</strong>: nilai ECDF pada persentil tertentu (mis. 25% dan 75%).</p></li>
+<li><p><strong>ecdf_percentile_count</strong>: jumlah titik data yang berada di bawah suatu persentil ECDF tertentu.</p></li>
+<li><p><strong>ecdf_slope</strong>: kemiringan garis ECDF antara dua titik persentil, mencerminkan seberapa cepat distribusi data naik pada rentang tersebut.</p></li>
+</ul>
+</section>
+<section id="domain-temporal">
+<h3>Domain Temporal<a class="headerlink" href="#domain-temporal" title="Link to this heading">#</a></h3>
+<p>Domain ini menilai bagaimana nilai CO berubah dan berpola sepanjang waktu, termasuk tren, kompleksitas, dan tingkat keteraturan sinyal.</p>
+<ul class="simple">
+<li><p><strong>abs_energy</strong>: total energi sinyal, dihitung dari jumlah kuadrat seluruh nilai.</p></li>
+<li><p><strong>auc (area under curve)</strong>: luas area di bawah kurva deret waktu.</p></li>
+<li><p><strong>average_power</strong>: rata-rata daya sinyal terhadap waktu (energi dibagi durasi).</p></li>
+<li><p><strong>autocorr</strong>: autokorelasi, mengukur seberapa mirip sinyal dengan versi tergesernya sendiri (misal, apakah nilai hari ini berkorelasi dengan nilai kemarin).</p></li>
+<li><p><strong>calc_centroid</strong>: titik pusat massa sinyal di sepanjang sumbu waktu.</p></li>
+<li><p><strong>distance</strong>: total panjang lintasan yang ditempuh sinyal dari titik pertama ke titik terakhir.</p></li>
+<li><p><strong>entropy</strong>: mengukur tingkat ketidakteraturan atau ketidakpastian pola dalam sinyal; makin acak, makin tinggi entropinya.</p></li>
+<li><p><strong>slope</strong>: kemiringan garis tren linear yang paling mendekati keseluruhan data (naik atau turun secara umum).</p></li>
+<li><p><strong>mean_diff, median_diff</strong>: rata-rata dan median dari selisih antar nilai berurutan (menunjukkan laju perubahan harian).</p></li>
+<li><p><strong>mean_abs_diff, median_abs_diff</strong>: sama seperti di atas, tetapi menggunakan nilai absolut sehingga arah naik/turun tidak saling meniadakan.</p></li>
+<li><p><strong>sum_abs_diff</strong>: total akumulasi dari seluruh selisih absolut antar hari.</p></li>
+<li><p><strong>mse (mean squared error)</strong>: rata-rata kuadrat selisih antara sinyal dan model referensinya.</p></li>
+<li><p><strong>negative_turning, positive_turning</strong>: jumlah titik balik di mana tren berubah dari naik ke turun, atau dari turun ke naik.</p></li>
+<li><p><strong>neighbourhood_peaks</strong>: jumlah titik puncak lokal yang terdeteksi dalam suatu jendela pengamatan.</p></li>
+<li><p><strong>pk_pk_distance (peak-to-peak distance)</strong>: selisih antara nilai puncak tertinggi dan lembah terendah.</p></li>
+<li><p><strong>zero_cross</strong>: jumlah kali sinyal melewati garis nol (atau nilai tengah tertentu).</p></li>
+<li><p><strong>dfa (detrended fluctuation analysis)</strong>: mengukur ketergantungan jangka panjang dalam data setelah tren dihilangkan.</p></li>
+<li><p><strong>hurst_exponent</strong>: menunjukkan apakah pola naik-turun cenderung berlanjut (memori jangka panjang) atau acak.</p></li>
+<li><p><strong>higuchi_fractal_dimension, petrosian_fractal_dimension</strong> — dua cara berbeda mengukur seberapa kompleks/bergeriginya bentuk sinyal secara matematis.</p></li>
+<li><p><strong>maximum_fractal_length</strong>: panjang maksimum lintasan fraktal yang teramati pada berbagai skala waktu.</p></li>
+<li><p><strong>lempel_ziv</strong>: mengukur kompleksitas sinyal berdasarkan seberapa banyak pola berulang yang bisa “dikompresi”.</p></li>
+</ul>
+</section>
+<section id="domain-spectral">
+<h3>Domain Spectral<a class="headerlink" href="#domain-spectral" title="Link to this heading">#</a></h3>
+<p>Domain ini mengubah sinyal CO ke ranah frekuensi (menggunakan transformasi Fourier atau wavelet) untuk melihat pola periodik yang tidak terlihat langsung dari data mentah.</p>
+<ul class="simple">
+<li><p><strong>fundamental_frequency</strong>: frekuensi dominan/paling menonjol dalam sinyal, menandakan siklus utama yang berulang.</p></li>
+<li><p><strong>max_frequency, median_frequency</strong>: frekuensi tertinggi dan frekuensi tengah (median) dari distribusi daya spektrum.</p></li>
+<li><p><strong>max_power_spectrum</strong>: nilai daya (energi) tertinggi yang ditemukan pada frekuensi dominan.</p></li>
+<li><p><strong>power_bandwidth</strong>: lebar pita frekuensi tempat sebagian besar energi sinyal terkonsentrasi.</p></li>
+<li><p><strong>human_range_energy</strong>: proporsi energi sinyal yang berada pada rentang frekuensi tertentu yang relevan.</p></li>
+<li><p><strong>spectral_centroid</strong>: titik berat frekuensi; menunjukkan apakah energi lebih terkonsentrasi di frekuensi rendah atau tinggi.</p></li>
+<li><p><strong>spectral_spread</strong>: seberapa lebar sebaran energi di sekitar spectral centroid.</p></li>
+<li><p><strong>spectral_skewness, spectral_kurtosis</strong>: versi domain frekuensi dari skewness dan kurtosis, mengukur bentuk kurva distribusi daya spektrum.</p></li>
+<li><p><strong>spectral_decrease, spectral_slope</strong>: mengukur seberapa cepat daya spektrum menurun seiring naiknya frekuensi.</p></li>
+<li><p><strong>spectral_distance</strong>: ukuran perbedaan antara profil spektrum sinyal dan bentuk referensinya.</p></li>
+<li><p><strong>spectral_entropy</strong>: entropi pada ranah frekuensi, mengukur seberapa merata energi tersebar di berbagai frekuensi (semakin merata, semakin tinggi).</p></li>
+<li><p><strong>spectral_positive_turning</strong>: jumlah titik balik naik pada kurva kepadatan spektral.</p></li>
+<li><p><strong>spectral_roll_off, spectral_roll_on</strong>: titik frekuensi tempat sebagian besar (misalnya 95%) energi sinyal sudah terakumulasi, dilihat dari sisi atas maupun bawah spektrum.</p></li>
+<li><p><strong>spectral_variation</strong>: seberapa besar variasi/perubahan bentuk spektrum dari waktu ke waktu.</p></li>
+<li><p><strong>spectrogram_mean_coeff</strong>: rata-rata nilai koefisien dari representasi spektrogram (peta waktu-frekuensi) sinyal.</p></li>
+<li><p><strong>lpcc (linear prediction cepstral coefficients)</strong>: koefisien yang merepresentasikan bentuk spektral sinyal secara ringkas, umum dipakai untuk mengenali pola/tekstur frekuensi.</p></li>
+<li><p><strong>mfcc (mel-frequency cepstral coefficients)</strong>: mirip lpcc, representasi ringkas spektrum yang mengikuti skala frekuensi mel, sering dipakai dalam pengenalan pola sinyal.</p></li>
+<li><p><strong>wavelet_abs_mean, wavelet_std, wavelet_var</strong>: rata-rata mutlak, standar deviasi, dan varians dari koefisien hasil transformasi wavelet, yang memecah sinyal ke berbagai skala waktu-frekuensi sekaligus.</p></li>
+<li><p><strong>wavelet_energy</strong>: total energi yang terkandung dalam koefisien wavelet.</p></li>
+<li><p><strong>wavelet_entropy</strong>: tingkat ketidakteraturan yang terukur dari distribusi energi antar skala wavelet.</p></li>
+</ul>
+</section>
+</section>
+<section id="ringkasan-alur">
+<h2>Ringkasan Alur<a class="headerlink" href="#ringkasan-alur" title="Link to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Crawling</span> <span class="n">CO</span> <span class="p">(</span><span class="n">polygon</span> <span class="n">Kecamatan</span> <span class="n">Burneh</span><span class="p">,</span> <span class="mi">24</span> <span class="n">Agst</span> <span class="mi">2025</span> <span class="o">-</span> <span class="mi">24</span> <span class="n">Agst</span> <span class="mi">2026</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">df_co</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">204</span> <span class="n">kosong</span> <span class="o">/</span> <span class="mf">55.7</span><span class="o">%</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Imputasi</span><span class="p">:</span> <span class="n">Linear</span> <span class="p">(</span><span class="n">pembanding</span><span class="p">)</span> <span class="n">vs</span> <span class="n">Seasonal</span> <span class="p">(</span><span class="n">FINAL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">df_co_seasonal</span> <span class="p">(</span><span class="mi">0</span> <span class="n">kosong</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Deteksi</span> <span class="n">outlier</span> <span class="n">subset</span><span class="o">-</span><span class="n">based</span> <span class="n">di</span> <span class="mi">162</span> <span class="n">data</span> <span class="n">asli</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="n">outlier</span> <span class="n">sejati</span> <span class="p">(</span><span class="mi">2025</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Capping</span> <span class="n">outlier</span> <span class="o">+</span> <span class="n">gabung</span> <span class="n">ke</span> <span class="n">df_co_seasonal</span> <span class="o">-&gt;</span> <span class="n">df_co_fixed</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">0</span> <span class="n">kosong</span><span class="p">,</span> <span class="mi">0</span> <span class="n">outlier</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Ekstraksi</span> <span class="n">TSFEL</span><span class="p">:</span> <span class="mi">67</span> <span class="n">fungsi</span> <span class="n">otomatis</span> <span class="o">+</span> <span class="mi">1</span> <span class="n">ECDF</span> <span class="n">Slope</span> <span class="n">manual</span> <span class="o">=</span> <span class="mi">68</span> <span class="n">fungsi</span> <span class="p">(</span><span class="mi">157</span> <span class="n">kolom</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">fitur_co_68</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+</section>
+</section>
 
     <script type="text/x-thebe-config">
     {
@@ -1026,6 +1387,21 @@ Kurtosis = 0.890
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overall-sum">Overall Sum</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-pertemuan-3">Tugas Pertemuan 3</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#perubahan-cakupan-wilayah">1. Perubahan Cakupan Wilayah</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crawling-ulang-data-co">2. Crawling Ulang Data CO</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imputasi-missing-value">3. Imputasi Missing Value</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deteksi-perbaikan-outlier">4. Deteksi &amp; Perbaikan Outlier</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ekstraksi-fitur-menggunakan-tsfel">5. Ekstraksi Fitur menggunakan TSFEL</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-domain-dan-fitur-tsfel">6. Penjelasan Domain dan Fitur TSFEL</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-statistical">Domain Statistical</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-temporal">Domain Temporal</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#domain-spectral">Domain Spectral</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-alur">Ringkasan Alur</a></li>
 </ul>
 </li>
 </ul>
