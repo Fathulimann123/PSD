@@ -226,6 +226,7 @@
 
 
 
+
 <li class="toctree-l1"><a class="reference internal" href="01_mulai-disini.html">Mulai Menulis</a></li>
 </ul>
 
@@ -459,6 +460,27 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-alur">Ringkasan Alur</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-4-k-means-clustering-knime">Tugas 4 — K-Means Clustering (KNIME)</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#karakteristik-data-input">1. Karakteristik Data Input</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alur-kerja-workflow-di-knime">2. Alur Kerja (Workflow) di KNIME</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-node">Penjelasan Node</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-per-skenario">3. Hasil per Skenario</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-3-tanpa-pca">3.1 Klastering k=3, Tanpa PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-5-tanpa-pca">3.2 Klastering k=5, Tanpa PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-3-dengan-pca">3.3 Klastering k=3, Dengan PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-5-dengan-pca">3.4 Klastering k=5, Dengan PCA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kode-ekspor-csv-python-script-legacy-di-knime">4. Kode Ekspor CSV (Python Script Legacy, di KNIME)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kode-scatter-plot-google-colab">5. Kode Scatter Plot (Google Colab)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#perbandingan-silhouette-coefficient-overall">Perbandingan Silhouette Coefficient (Overall)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1285,14 +1307,273 @@ Kurtosis = 0.890
 <section id="ringkasan-alur">
 <h2>Ringkasan Alur<a class="headerlink" href="#ringkasan-alur" title="Link to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Crawling</span> <span class="n">CO</span> <span class="p">(</span><span class="n">polygon</span> <span class="n">Kecamatan</span> <span class="n">Burneh</span><span class="p">,</span> <span class="mi">24</span> <span class="n">Agst</span> <span class="mi">2025</span> <span class="o">-</span> <span class="mi">24</span> <span class="n">Agst</span> <span class="mi">2026</span><span class="p">)</span>
-    <span class="o">-&gt;</span> <span class="n">df_co</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">204</span> <span class="n">kosong</span> <span class="o">/</span> <span class="mf">55.7</span><span class="o">%</span><span class="p">)</span>
-    <span class="o">-&gt;</span> <span class="n">Imputasi</span><span class="p">:</span> <span class="n">Linear</span> <span class="p">(</span><span class="n">pembanding</span><span class="p">)</span> <span class="n">vs</span> <span class="n">Seasonal</span> <span class="p">(</span><span class="n">FINAL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">df_co_seasonal</span> <span class="p">(</span><span class="mi">0</span> <span class="n">kosong</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">df_co</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">204</span> <span class="n">kosong</span> <span class="o">/</span> <span class="mf">55.7</span><span class="o">%</span><span class="p">,</span> <span class="mi">162</span> <span class="n">data</span> <span class="n">asli</span><span class="p">)</span>
     <span class="o">-&gt;</span> <span class="n">Deteksi</span> <span class="n">outlier</span> <span class="n">subset</span><span class="o">-</span><span class="n">based</span> <span class="n">di</span> <span class="mi">162</span> <span class="n">data</span> <span class="n">asli</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="n">outlier</span> <span class="n">sejati</span> <span class="p">(</span><span class="mi">2025</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span><span class="p">)</span>
-    <span class="o">-&gt;</span> <span class="n">Capping</span> <span class="n">outlier</span> <span class="o">+</span> <span class="n">gabung</span> <span class="n">ke</span> <span class="n">df_co_seasonal</span> <span class="o">-&gt;</span> <span class="n">df_co_fixed</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">0</span> <span class="n">kosong</span><span class="p">,</span> <span class="mi">0</span> <span class="n">outlier</span><span class="p">)</span>
-    <span class="o">-&gt;</span> <span class="n">Ekstraksi</span> <span class="n">TSFEL</span><span class="p">:</span> <span class="mi">67</span> <span class="n">fungsi</span> <span class="n">otomatis</span> <span class="o">+</span> <span class="mi">1</span> <span class="n">ECDF</span> <span class="n">Slope</span> <span class="n">manual</span> <span class="o">=</span> <span class="mi">68</span> <span class="n">fungsi</span> <span class="p">(</span><span class="mi">157</span> <span class="n">kolom</span><span class="p">)</span>
-    <span class="o">-&gt;</span> <span class="n">fitur_co_68</span><span class="o">.</span><span class="n">csv</span>
+    <span class="o">-&gt;</span> <span class="n">Imputasi</span><span class="p">:</span> <span class="n">Linear</span> <span class="p">(</span><span class="n">pembanding</span><span class="p">)</span> <span class="n">vs</span> <span class="n">Seasonal</span> <span class="p">(</span><span class="n">FINAL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">df_co_seasonal</span> <span class="p">(</span><span class="mi">0</span> <span class="n">kosong</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Capping</span> <span class="n">outlier</span> <span class="p">(</span><span class="n">dari</span> <span class="n">df_co</span> <span class="n">asli</span><span class="p">)</span> <span class="o">+</span> <span class="n">gabung</span> <span class="n">ke</span> <span class="n">df_co_seasonal</span> <span class="o">-&gt;</span> <span class="n">df_co_fixed</span> <span class="p">(</span><span class="mi">366</span> <span class="n">hari</span><span class="p">,</span> <span class="mi">0</span> <span class="n">kosong</span><span class="p">,</span> <span class="mi">0</span> <span class="n">outlier</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Ekstraksi</span> <span class="n">TSFEL</span><span class="p">:</span> <span class="n">panggil</span> <span class="mi">68</span> <span class="n">fungsi</span> <span class="n">fitur</span> <span class="n">langsung</span> <span class="n">dari</span> <span class="n">tsfel</span><span class="o">.</span><span class="n">feature_extraction</span><span class="o">.</span><span class="n">features</span> <span class="o">-&gt;</span> <span class="mi">68</span> <span class="n">fitur</span> <span class="p">(</span><span class="mi">68</span> <span class="n">kolom</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">CO_burneh_TSFEL</span><span class="o">.</span><span class="n">csv</span>
 </pre></div>
 </div>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="tugas-4-k-means-clustering-knime">
+<h1>Tugas 4 — K-Means Clustering (KNIME)<a class="headerlink" href="#tugas-4-k-means-clustering-knime" title="Link to this heading">#</a></h1>
+<p>Dokumentasi ini menyajikan analisis pengelompokan (<em>clustering</em>) data deret waktu 4 polutan udara (CO, NO2, SO2, CH4) dari 19 mahasiswa/wilayah pengamatan menggunakan <strong>KNIME Analytics Platform</strong> dengan algoritma <strong>K-Means</strong>.</p>
+<p>Tujuan analisis ini adalah membandingkan dua pendekatan pengolahan:</p>
+<ol class="arabic simple">
+<li><p><strong>Dengan PCA (19 Dimensi)</strong>: mereduksi 272 fitur awal menjadi 19 komponen utama sebelum dikelompokkan K-Means.</p></li>
+<li><p><strong>Tanpa PCA (272 Fitur Penuh)</strong>: memasukkan seluruh 272 fitur numerik TSFEL langsung ke K-Means tanpa reduksi dimensi.</p></li>
+</ol>
+<p>Masing-masing pendekatan diuji dengan jumlah klaster k=3 dan k=5.</p>
+<section id="karakteristik-data-input">
+<h2>1. Karakteristik Data Input<a class="headerlink" href="#karakteristik-data-input" title="Link to this heading">#</a></h2>
+<p>Dataset merupakan gabungan fitur hasil ekstraksi TSFEL dari 19 mahasiswa/wilayah observasi. Setiap mahasiswa direpresentasikan oleh 272 fitur numerik:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Total</span> <span class="n">Fitur</span> <span class="o">=</span> <span class="mi">4</span> <span class="n">Polutan</span> <span class="n">x</span> <span class="mi">68</span> <span class="n">Fitur</span> <span class="n">TSFEL</span> <span class="o">=</span> <span class="mi">272</span> <span class="n">Fitur</span>
+</pre></div>
+</div>
+<p>Keempat polutan yang dianalisis: <strong>CO</strong> (Karbon Monoksida), <strong>NO2</strong> (Nitrogen Dioksida), <strong>SO2</strong> (Sulfur Dioksida), <strong>CH4</strong> (Metana) — masing-masing menyumbang 68 fitur statistical, temporal, dan spectral.</p>
+</section>
+<section id="alur-kerja-workflow-di-knime">
+<h2>2. Alur Kerja (Workflow) di KNIME<a class="headerlink" href="#alur-kerja-workflow-di-knime" title="Link to this heading">#</a></h2>
+<p><img alt="node-knime" src="../_images/node_knime.png" /></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Excel</span> <span class="n">Reader</span>
+    <span class="o">-&gt;</span> <span class="n">Column</span> <span class="n">Filter</span> <span class="p">(</span><span class="n">buang</span> <span class="n">Nama</span><span class="p">,</span> <span class="n">Daerah</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="n">Normalizer</span> <span class="p">(</span><span class="n">Z</span><span class="o">-</span><span class="n">Score</span><span class="p">)</span>
+    <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Jalur</span> <span class="n">A</span><span class="p">:</span> <span class="n">PCA</span> <span class="p">(</span><span class="mi">19</span> <span class="n">dimensi</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">k</span><span class="o">-</span><span class="n">Means</span><span class="p">]</span>
+    <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Jalur</span> <span class="n">B</span><span class="p">:</span> <span class="n">k</span><span class="o">-</span><span class="n">Means</span> <span class="n">langsung</span><span class="p">,</span> <span class="n">tanpa</span> <span class="n">PCA</span><span class="p">]</span>
+
+<span class="n">Tiap</span> <span class="n">k</span><span class="o">-</span><span class="n">Means</span> <span class="n">bercabang</span> <span class="n">dua</span><span class="p">:</span>
+    <span class="n">k</span><span class="o">-</span><span class="n">Means</span> <span class="o">-&gt;</span> <span class="n">Silhouette</span> <span class="n">Coefficient</span> <span class="o">-&gt;</span> <span class="n">Table</span> <span class="n">View</span>
+    <span class="n">k</span><span class="o">-</span><span class="n">Means</span> <span class="o">-&gt;</span> <span class="n">Joiner</span> <span class="p">(</span><span class="o">+</span> <span class="n">Excel</span> <span class="n">Reader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Python</span> <span class="n">Script</span> <span class="o">-&gt;</span> <span class="n">Scatter</span> <span class="n">Plot</span>
+</pre></div>
+</div>
+<section id="penjelasan-node">
+<h3>Penjelasan Node<a class="headerlink" href="#penjelasan-node" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Excel Reader</strong> — membaca berkas kompilasi data 19 mahasiswa (kolom <code class="docutils literal notranslate"><span class="pre">Nama</span></code>, <code class="docutils literal notranslate"><span class="pre">Daerah</span></code>, dan 272 kolom fitur).</p></li>
+<li><p><strong>Column Filter</strong> — memisahkan kolom identitas (<code class="docutils literal notranslate"><span class="pre">Nama</span></code>, <code class="docutils literal notranslate"><span class="pre">Daerah</span></code>) dari kolom fitur numerik, karena PCA/K-Means hanya menerima data numerik.</p></li>
+<li><p><strong>Normalizer (Z-Score)</strong> — menstandarkan skala seluruh fitur, agar fitur berskala besar (mis. CH4) tidak mendominasi fitur berskala kecil (mis. NO2) dalam perhitungan jarak.</p></li>
+<li><p><strong>PCA</strong> — mereduksi 272 fitur menjadi 19 komponen utama (jumlah dimensi = jumlah mahasiswa).</p></li>
+<li><p><strong>k-Means</strong> — mengelompokkan data ke dalam <em>k</em> klaster, dijalankan 4 kali (k=3/k=5, dengan/tanpa PCA).</p></li>
+<li><p><strong>Silhouette Coefficient</strong> — mengukur seberapa baik tiap data dikelompokkan ke klasternya; nilai mendekati 1 menunjukkan klastering yang baik.</p></li>
+<li><p><strong>Joiner</strong> — menggabungkan kembali kolom <code class="docutils literal notranslate"><span class="pre">Nama</span></code> (dari Excel Reader) ke hasil k-Means (yang sudah kehilangan kolom <code class="docutils literal notranslate"><span class="pre">Nama</span></code> setelah PCA/K-Means), berdasarkan RowID.</p></li>
+<li><p><strong>Python Script</strong> — mengekspor hasil cluster assignment ke CSV untuk divisualisasikan.</p></li>
+<li><p><strong>Scatter Plot</strong> (dibuat dari CSV hasil ekspor, lihat kode Python di bagian akhir) — memvisualisasikan sebaran mahasiswa per klaster.</p></li>
+</ol>
+</section>
+</section>
+<section id="hasil-per-skenario">
+<h2>3. Hasil per Skenario<a class="headerlink" href="#hasil-per-skenario" title="Link to this heading">#</a></h2>
+<section id="klastering-k-3-tanpa-pca">
+<h3>3.1 Klastering k=3, Tanpa PCA<a class="headerlink" href="#klastering-k-3-tanpa-pca" title="Link to this heading">#</a></h3>
+<p><em>Tabel Silhouette Coefficient:</em></p>
+<p><img alt="k3-nopca" src="../_images/k3_nopca_knime.png" /></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Klaster</p></th>
+<th class="head"><p>Mean Silhouette</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cluster_0</p></td>
+<td><p>-0.138</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_2</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall</strong></p></td>
+<td><p><strong>-0.123</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Scatter Plot:</em></p>
+<p><img alt="k3-nopca" src="../_images/k3_nopca.png" /></p>
+<p><strong>Ringkasan:</strong> <code class="docutils literal notranslate"><span class="pre">cluster_0</span></code> menampung 17 mahasiswa, sedangkan <code class="docutils literal notranslate"><span class="pre">cluster_1</span></code> (Raihan Aryanova Narendra) dan <code class="docutils literal notranslate"><span class="pre">cluster_2</span></code> (Wildan Haydar Amru) masing-masing hanya berisi 1 anggota (silhouette = 0).</p>
+</section>
+<section id="klastering-k-5-tanpa-pca">
+<h3>3.2 Klastering k=5, Tanpa PCA<a class="headerlink" href="#klastering-k-5-tanpa-pca" title="Link to this heading">#</a></h3>
+<p><em>Tabel Silhouette Coefficient:</em></p>
+<p><img alt="k5-nopca" src="../_images/k5_nopca_knime.png" /></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Klaster</p></th>
+<th class="head"><p>Mean Silhouette</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cluster_0</p></td>
+<td><p>-0.079</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_1</p></td>
+<td><p>0.408</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_2</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_3</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_4</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall</strong></p></td>
+<td><p><strong>0.010</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Scatter Plot:</em></p>
+<p><img alt="k5-nopca" src="../_images/k3_nopca.png" /></p>
+<p><strong>Ringkasan:</strong> <code class="docutils literal notranslate"><span class="pre">cluster_0</span></code> berisi 13 mahasiswa, <code class="docutils literal notranslate"><span class="pre">cluster_1</span></code> berisi 3 mahasiswa (Kevin Koligombowo Mangaraja, Mohammad Waqidi, fikri mutawakkil), dan <code class="docutils literal notranslate"><span class="pre">cluster_2</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster_3</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster_4</span></code> masing-masing 1 anggota (Muhammad Fathul Iman Wahid, Raihan Aryanova Narendra, Wildan Haydar Amru).</p>
+</section>
+<section id="klastering-k-3-dengan-pca">
+<h3>3.3 Klastering k=3, Dengan PCA<a class="headerlink" href="#klastering-k-3-dengan-pca" title="Link to this heading">#</a></h3>
+<p><em>Tabel Silhouette Coefficient:</em></p>
+<p><img alt="k3-pca" src="../_images/k3_pca_knime.png" /></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Klaster</p></th>
+<th class="head"><p>Mean Silhouette</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cluster_0</p></td>
+<td><p>-0.138</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_2</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall</strong></p></td>
+<td><p><strong>-0.123</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Scatter Plot:</em></p>
+<p><img alt="k3-pca" src="../_images/k3_pca.png" /></p>
+<p><strong>Ringkasan:</strong> <code class="docutils literal notranslate"><span class="pre">cluster_0</span></code> menampung 17 mahasiswa, sedangkan <code class="docutils literal notranslate"><span class="pre">cluster_1</span></code> (Raihan Aryanova Narendra) dan <code class="docutils literal notranslate"><span class="pre">cluster_2</span></code> (Wildan Haydar Amru) masing-masing hanya berisi 1 anggota (silhouette = 0). Hasilnya identik dengan skenario 3.1.</p>
+</section>
+<section id="klastering-k-5-dengan-pca">
+<h3>3.4 Klastering k=5, Dengan PCA<a class="headerlink" href="#klastering-k-5-dengan-pca" title="Link to this heading">#</a></h3>
+<p><em>Tabel Silhouette Coefficient:</em></p>
+<p><img alt="k5-pca" src="../_images/k5_pca_knime.png" /></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Klaster</p></th>
+<th class="head"><p>Mean Silhouette</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cluster_0</p></td>
+<td><p>-0.079</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_1</p></td>
+<td><p>0.408</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_2</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>cluster_3</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster_4</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall</strong></p></td>
+<td><p><strong>0.010</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Scatter Plot:</em>
+<img alt="k5-pca" src="../_images/k5_pca.png" /></p>
+<p><strong>Ringkasan:</strong> <code class="docutils literal notranslate"><span class="pre">cluster_0</span></code> berisi 13 mahasiswa, <code class="docutils literal notranslate"><span class="pre">cluster_1</span></code> berisi 3 mahasiswa (Kevin Koligombowo Mangaraja, Mohammad Waqidi, fikri mutawakkil), dan <code class="docutils literal notranslate"><span class="pre">cluster_2</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster_3</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster_4</span></code> masing-masing 1 anggota (Muhammad Fathul Iman Wahid, Raihan Aryanova Narendra, Wildan Haydar Amru). Hasilnya identik dengan skenario 3.2.</p>
+</section>
+</section>
+<section id="kode-ekspor-csv-python-script-legacy-di-knime">
+<h2>4. Kode Ekspor CSV (Python Script Legacy, di KNIME)<a class="headerlink" href="#kode-ekspor-csv-python-script-legacy-di-knime" title="Link to this heading">#</a></h2>
+<p>Dipasang setelah node <strong>Joiner</strong> pada tiap skenario:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">input_table_1</span>
+<span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"hasil_k3_nopca.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># ganti nama sesuai skenario</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Disimpan di:"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">"hasil_k3_nopca.csv"</span><span class="p">))</span>
+<span class="n">output_table_1</span> <span class="o">=</span> <span class="n">data</span>
+</pre></div>
+</div>
+<p>Nama file per skenario: <code class="docutils literal notranslate"><span class="pre">hasil_k3_nopca.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">hasil_k5_nopca.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">hasil_k3_pca.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">hasil_k5_pca.csv</span></code>.</p>
+</section>
+<section id="kode-scatter-plot-google-colab">
+<h2>5. Kode Scatter Plot (Google Colab)<a class="headerlink" href="#kode-scatter-plot-google-colab" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">skenario</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">"hasil_k3_nopca.csv"</span><span class="p">,</span> <span class="s2">"k=3, Tanpa PCA"</span><span class="p">,</span> <span class="s2">"img_k3_nopca/scatter_k3_nopca.png"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"hasil_k5_nopca.csv"</span><span class="p">,</span> <span class="s2">"k=5, Tanpa PCA"</span><span class="p">,</span> <span class="s2">"img_k5_nopca/scatter_k5_nopca.png"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"hasil_k3_pca.csv"</span><span class="p">,</span> <span class="s2">"k=3, Dengan PCA"</span><span class="p">,</span> <span class="s2">"img_k3_pca/scatter_k3_pca.png"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"hasil_k5_pca.csv"</span><span class="p">,</span> <span class="s2">"k=5, Dengan PCA"</span><span class="p">,</span> <span class="s2">"img_k5_pca/scatter_k5_pca.png"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">judul</span><span class="p">,</span> <span class="n">output_path</span> <span class="ow">in</span> <span class="n">skenario</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Cluster"</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Cluster"</span><span class="p">]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#6b8bd6"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">"Nama"</span><span class="p">],</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"cluster_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">K</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Scatter Plot - </span><span class="si">{</span><span class="n">judul</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">"bold"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Nama"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Cluster"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#eeeeee"</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="kesimpulan">
+<h2>7. Kesimpulan<a class="headerlink" href="#kesimpulan" title="Link to this heading">#</a></h2>
+<section id="perbandingan-silhouette-coefficient-overall">
+<h3>Perbandingan Silhouette Coefficient (Overall)<a class="headerlink" href="#perbandingan-silhouette-coefficient-overall" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Skenario</p></th>
+<th class="head"><p>Tanpa PCA (272 fitur)</p></th>
+<th class="head"><p>Dengan PCA (19 komponen)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>k=3</p></td>
+<td><p>-0.123</p></td>
+<td><p>-0.123</p></td>
+</tr>
+<tr class="row-odd"><td><p>k=5</p></td>
+<td><p>0.010</p></td>
+<td><p>0.010</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<ol class="arabic simple">
+<li><p><strong>k=5 menghasilkan Silhouette tertinggi</strong> (0.010 vs -0.123 untuk k=3). Namun nilai 0.010 masih sangat dekat dengan 0, artinya struktur klaster pada data ini lemah dan tidak terpisah dengan jelas. Satu-satunya klaster yang cukup padat adalah <code class="docutils literal notranslate"><span class="pre">cluster_1</span></code> pada k=5 (0.408, 3 anggota).</p></li>
+<li><p><strong>Hasil PCA dan tanpa PCA identik</strong>, baik nilai Silhouette maupun anggota kelompoknya. Penyebabnya: data hanya 19 baris, sehingga setelah dinormalisasi (dipusatkan) rank data paling banyak 18. PCA dengan 19 komponen berarti hanya memutar sumbu tanpa membuang variansi, sehingga jarak antar data tidak berubah dan K-Means menghasilkan klaster yang sama. Reduksi dimensi baru berpengaruh jika jumlah komponen dibuat lebih kecil dari jumlah data (mis. komponen yang menjelaskan 90-95% variansi).</p></li>
+<li><p><strong>Klaster sangat tidak seimbang</strong>: pada k=3, 17 dari 19 mahasiswa berada di <code class="docutils literal notranslate"><span class="pre">cluster_0</span></code> (silhouette -0.138), sedangkan sisanya terpisah sebagai klaster beranggota tunggal. Raihan Aryanova Narendra dan Wildan Haydar Amru selalu terpisah sendiri di semua skenario, sehingga keduanya kemungkinan <em>outlier</em> pada 272 fitur. Silhouette klaster beranggota tunggal didefinisikan 0, sehingga nilai <em>overall</em> ditentukan hampir sepenuhnya oleh klaster besar yang bernilai negatif (k=3) atau mendekati nol (k=5).</p></li>
+<li><p><strong>Kemungkinan penyebab lain</strong>: jumlah fitur (272) jauh lebih besar dari jumlah data (19), sehingga jarak Euclidean menjadi kurang membedakan (<em>curse of dimensionality</em>). Data yang digunakan juga belum tentu memiliki kelompok alami.</p></li>
+</ol>
+</section>
 </section>
 </section>
 
@@ -1402,6 +1683,27 @@ Kurtosis = 0.890
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ringkasan-alur">Ringkasan Alur</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tugas-4-k-means-clustering-knime">Tugas 4 — K-Means Clustering (KNIME)</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#karakteristik-data-input">1. Karakteristik Data Input</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alur-kerja-workflow-di-knime">2. Alur Kerja (Workflow) di KNIME</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#penjelasan-node">Penjelasan Node</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-per-skenario">3. Hasil per Skenario</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-3-tanpa-pca">3.1 Klastering k=3, Tanpa PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-5-tanpa-pca">3.2 Klastering k=5, Tanpa PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-3-dengan-pca">3.3 Klastering k=3, Dengan PCA</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#klastering-k-5-dengan-pca">3.4 Klastering k=5, Dengan PCA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kode-ekspor-csv-python-script-legacy-di-knime">4. Kode Ekspor CSV (Python Script Legacy, di KNIME)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kode-scatter-plot-google-colab">5. Kode Scatter Plot (Google Colab)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#perbandingan-silhouette-coefficient-overall">Perbandingan Silhouette Coefficient (Overall)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

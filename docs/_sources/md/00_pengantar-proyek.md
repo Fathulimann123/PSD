@@ -744,10 +744,204 @@ Domain ini mengubah sinyal CO ke ranah frekuensi (menggunakan transformasi Fouri
 
 ```
 Crawling CO (polygon Kecamatan Burneh, 24 Agst 2025 - 24 Agst 2026)
-    -> df_co (366 hari, 204 kosong / 55.7%)
-    -> Imputasi: Linear (pembanding) vs Seasonal (FINAL) -> df_co_seasonal (0 kosong)
+    -> df_co (366 hari, 204 kosong / 55.7%, 162 data asli)
     -> Deteksi outlier subset-based di 162 data asli -> 1 outlier sejati (2025-10-07)
-    -> Capping outlier + gabung ke df_co_seasonal -> df_co_fixed (366 hari, 0 kosong, 0 outlier)
-    -> Ekstraksi TSFEL: 67 fungsi otomatis + 1 ECDF Slope manual = 68 fungsi (157 kolom)
-    -> fitur_co_68.csv
+    -> Imputasi: Linear (pembanding) vs Seasonal (FINAL) -> df_co_seasonal (0 kosong)
+    -> Capping outlier (dari df_co asli) + gabung ke df_co_seasonal -> df_co_fixed (366 hari, 0 kosong, 0 outlier)
+    -> Ekstraksi TSFEL: panggil 68 fungsi fitur langsung dari tsfel.feature_extraction.features -> 68 fitur (68 kolom)
+    -> CO_burneh_TSFEL.csv
 ```
+
+# Tugas 4 — K-Means Clustering (KNIME)
+
+Dokumentasi ini menyajikan analisis pengelompokan (*clustering*) data deret waktu 4 polutan udara (CO, NO2, SO2, CH4) dari 19 mahasiswa/wilayah pengamatan menggunakan **KNIME Analytics Platform** dengan algoritma **K-Means**.
+
+Tujuan analisis ini adalah membandingkan dua pendekatan pengolahan:
+
+1. **Dengan PCA (19 Dimensi)**: mereduksi 272 fitur awal menjadi 19 komponen utama sebelum dikelompokkan K-Means.
+2. **Tanpa PCA (272 Fitur Penuh)**: memasukkan seluruh 272 fitur numerik TSFEL langsung ke K-Means tanpa reduksi dimensi.
+
+Masing-masing pendekatan diuji dengan jumlah klaster k=3 dan k=5.
+
+## 1. Karakteristik Data Input
+
+Dataset merupakan gabungan fitur hasil ekstraksi TSFEL dari 19 mahasiswa/wilayah observasi. Setiap mahasiswa direpresentasikan oleh 272 fitur numerik:
+
+```
+Total Fitur = 4 Polutan x 68 Fitur TSFEL = 272 Fitur
+```
+
+Keempat polutan yang dianalisis: **CO** (Karbon Monoksida), **NO2** (Nitrogen Dioksida), **SO2** (Sulfur Dioksida), **CH4** (Metana) — masing-masing menyumbang 68 fitur statistical, temporal, dan spectral.
+
+## 2. Alur Kerja (Workflow) di KNIME
+
+![node-knime](../img/tugas4/node_knime.png)
+
+```
+Excel Reader
+    -> Column Filter (buang Nama, Daerah)
+    -> Normalizer (Z-Score)
+    -> [Jalur A: PCA (19 dimensi) -> k-Means]
+    -> [Jalur B: k-Means langsung, tanpa PCA]
+
+Tiap k-Means bercabang dua:
+    k-Means -> Silhouette Coefficient -> Table View
+    k-Means -> Joiner (+ Excel Reader) -> Python Script -> Scatter Plot
+```
+
+### Penjelasan Node
+
+1. **Excel Reader** — membaca berkas kompilasi data 19 mahasiswa (kolom `Nama`, `Daerah`, dan 272 kolom fitur).
+2. **Column Filter** — memisahkan kolom identitas (`Nama`, `Daerah`) dari kolom fitur numerik, karena PCA/K-Means hanya menerima data numerik.
+3. **Normalizer (Z-Score)** — menstandarkan skala seluruh fitur, agar fitur berskala besar (mis. CH4) tidak mendominasi fitur berskala kecil (mis. NO2) dalam perhitungan jarak.
+4. **PCA** — mereduksi 272 fitur menjadi 19 komponen utama (jumlah dimensi = jumlah mahasiswa).
+5. **k-Means** — mengelompokkan data ke dalam *k* klaster, dijalankan 4 kali (k=3/k=5, dengan/tanpa PCA).
+6. **Silhouette Coefficient** — mengukur seberapa baik tiap data dikelompokkan ke klasternya; nilai mendekati 1 menunjukkan klastering yang baik.
+7. **Joiner** — menggabungkan kembali kolom `Nama` (dari Excel Reader) ke hasil k-Means (yang sudah kehilangan kolom `Nama` setelah PCA/K-Means), berdasarkan RowID.
+8. **Python Script** — mengekspor hasil cluster assignment ke CSV untuk divisualisasikan.
+9. **Scatter Plot** (dibuat dari CSV hasil ekspor, lihat kode Python di bagian akhir) — memvisualisasikan sebaran mahasiswa per klaster.
+
+## 3. Hasil per Skenario
+
+### 3.1 Klastering k=3, Tanpa PCA
+
+*Tabel Silhouette Coefficient:*
+
+![k3-nopca](../img/tugas4/k3_nopca_knime.png)
+
+| Klaster | Mean Silhouette |
+|---|---|
+| cluster_0 | -0.138 |
+| cluster_1 | 0 |
+| cluster_2 | 0 |
+| **Overall** | **-0.123** |
+
+*Scatter Plot:*
+
+![k3-nopca](../img/tugas4/k3_nopca.png)
+
+**Ringkasan:** `cluster_0` menampung 17 mahasiswa, sedangkan `cluster_1` (Raihan Aryanova Narendra) dan `cluster_2` (Wildan Haydar Amru) masing-masing hanya berisi 1 anggota (silhouette = 0). 
+
+### 3.2 Klastering k=5, Tanpa PCA
+
+*Tabel Silhouette Coefficient:*
+
+![k5-nopca](../img/tugas4/k5_nopca_knime.png)
+
+| Klaster | Mean Silhouette |
+|---|---|
+| cluster_0 | -0.079 |
+| cluster_1 | 0.408 |
+| cluster_2 | 0 |
+| cluster_3 | 0 |
+| cluster_4 | 0 |
+| **Overall** | **0.010** |
+
+*Scatter Plot:*
+
+![k5-nopca](../img/tugas4/k3_nopca.png)
+
+**Ringkasan:** `cluster_0` berisi 13 mahasiswa, `cluster_1` berisi 3 mahasiswa (Kevin Koligombowo Mangaraja, Mohammad Waqidi, fikri mutawakkil), dan `cluster_2`, `cluster_3`, `cluster_4` masing-masing 1 anggota (Muhammad Fathul Iman Wahid, Raihan Aryanova Narendra, Wildan Haydar Amru).
+
+### 3.3 Klastering k=3, Dengan PCA
+
+*Tabel Silhouette Coefficient:*
+
+![k3-pca](../img/tugas4/k3_pca_knime.png)
+
+
+| Klaster | Mean Silhouette |
+|---|---|
+| cluster_0 | -0.138 |
+| cluster_1 | 0 |
+| cluster_2 | 0 |
+| **Overall** | **-0.123** |
+
+*Scatter Plot:*
+
+![k3-pca](../img/tugas4/k3_pca.png)
+
+**Ringkasan:** `cluster_0` menampung 17 mahasiswa, sedangkan `cluster_1` (Raihan Aryanova Narendra) dan `cluster_2` (Wildan Haydar Amru) masing-masing hanya berisi 1 anggota (silhouette = 0). Hasilnya identik dengan skenario 3.1.
+
+### 3.4 Klastering k=5, Dengan PCA
+
+*Tabel Silhouette Coefficient:*
+
+![k5-pca](../img/tugas4/k5_pca_knime.png)
+
+
+| Klaster | Mean Silhouette |
+|---|---|
+| cluster_0 | -0.079 |
+| cluster_1 | 0.408 |
+| cluster_2 | 0 |
+| cluster_3 | 0 |
+| cluster_4 | 0 |
+| **Overall** | **0.010** |
+
+*Scatter Plot:*
+![k5-pca](../img/tugas4/k5_pca.png)
+
+**Ringkasan:** `cluster_0` berisi 13 mahasiswa, `cluster_1` berisi 3 mahasiswa (Kevin Koligombowo Mangaraja, Mohammad Waqidi, fikri mutawakkil), dan `cluster_2`, `cluster_3`, `cluster_4` masing-masing 1 anggota (Muhammad Fathul Iman Wahid, Raihan Aryanova Narendra, Wildan Haydar Amru). Hasilnya identik dengan skenario 3.2.
+
+## 4. Kode Ekspor CSV (Python Script Legacy, di KNIME)
+
+Dipasang setelah node **Joiner** pada tiap skenario:
+
+```python
+import os
+
+data = input_table_1
+data.to_csv("hasil_k3_nopca.csv", index=False)  # ganti nama sesuai skenario
+print("Disimpan di:", os.path.abspath("hasil_k3_nopca.csv"))
+output_table_1 = data
+```
+
+Nama file per skenario: `hasil_k3_nopca.csv`, `hasil_k5_nopca.csv`, `hasil_k3_pca.csv`, `hasil_k5_pca.csv`.
+
+## 5. Kode Scatter Plot (Google Colab)
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+skenario = [
+    ("hasil_k3_nopca.csv", "k=3, Tanpa PCA", "img_k3_nopca/scatter_k3_nopca.png"),
+    ("hasil_k5_nopca.csv", "k=5, Tanpa PCA", "img_k5_nopca/scatter_k5_nopca.png"),
+    ("hasil_k3_pca.csv", "k=3, Dengan PCA", "img_k3_pca/scatter_k3_pca.png"),
+    ("hasil_k5_pca.csv", "k=5, Dengan PCA", "img_k5_pca/scatter_k5_pca.png"),
+]
+
+for fname, judul, output_path in skenario:
+    data = pd.read_csv(fname)
+    K = data["Cluster"].nunique()
+    x = range(len(data))
+    y = data["Cluster"]
+
+    plt.figure(figsize=(14, 5))
+    plt.scatter(x, y, s=25, color="#6b8bd6")
+    plt.xticks(x, data["Nama"], rotation=90, fontsize=7)
+    plt.yticks(range(K), [f"cluster_{i}" for i in range(K)])
+    plt.ylim(-0.5, K - 0.5)
+    plt.title(f"Scatter Plot - {judul}", loc="left", fontweight="bold")
+    plt.xlabel("Nama")
+    plt.ylabel("Cluster")
+    plt.grid(True, color="#eeeeee")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.show()
+```
+
+## 7. Kesimpulan
+
+### Perbandingan Silhouette Coefficient (Overall)
+
+| Skenario | Tanpa PCA (272 fitur) | Dengan PCA (19 komponen) |
+|---|---|---|
+| k=3 | -0.123 | -0.123 |
+| k=5 | 0.010 | 0.010 |
+
+1. **k=5 menghasilkan Silhouette tertinggi** (0.010 vs -0.123 untuk k=3). Namun nilai 0.010 masih sangat dekat dengan 0, artinya struktur klaster pada data ini lemah dan tidak terpisah dengan jelas. Satu-satunya klaster yang cukup padat adalah `cluster_1` pada k=5 (0.408, 3 anggota).
+2. **Hasil PCA dan tanpa PCA identik**, baik nilai Silhouette maupun anggota kelompoknya. Penyebabnya: data hanya 19 baris, sehingga setelah dinormalisasi (dipusatkan) rank data paling banyak 18. PCA dengan 19 komponen berarti hanya memutar sumbu tanpa membuang variansi, sehingga jarak antar data tidak berubah dan K-Means menghasilkan klaster yang sama. Reduksi dimensi baru berpengaruh jika jumlah komponen dibuat lebih kecil dari jumlah data (mis. komponen yang menjelaskan 90-95% variansi).
+3. **Klaster sangat tidak seimbang**: pada k=3, 17 dari 19 mahasiswa berada di `cluster_0` (silhouette -0.138), sedangkan sisanya terpisah sebagai klaster beranggota tunggal. Raihan Aryanova Narendra dan Wildan Haydar Amru selalu terpisah sendiri di semua skenario, sehingga keduanya kemungkinan *outlier* pada 272 fitur. Silhouette klaster beranggota tunggal didefinisikan 0, sehingga nilai *overall* ditentukan hampir sepenuhnya oleh klaster besar yang bernilai negatif (k=3) atau mendekati nol (k=5).
+4. **Kemungkinan penyebab lain**: jumlah fitur (272) jauh lebih besar dari jumlah data (19), sehingga jarak Euclidean menjadi kurang membedakan (*curse of dimensionality*). Data yang digunakan juga belum tentu memiliki kelompok alami.
