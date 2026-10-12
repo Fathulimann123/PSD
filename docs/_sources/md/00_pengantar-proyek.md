@@ -945,3 +945,931 @@ for fname, judul, output_path in skenario:
 2. **Hasil PCA dan tanpa PCA identik**, baik nilai Silhouette maupun anggota kelompoknya. Penyebabnya: data hanya 19 baris, sehingga setelah dinormalisasi (dipusatkan) rank data paling banyak 18. PCA dengan 19 komponen berarti hanya memutar sumbu tanpa membuang variansi, sehingga jarak antar data tidak berubah dan K-Means menghasilkan klaster yang sama. Reduksi dimensi baru berpengaruh jika jumlah komponen dibuat lebih kecil dari jumlah data (mis. komponen yang menjelaskan 90-95% variansi).
 3. **Klaster sangat tidak seimbang**: pada k=3, 17 dari 19 mahasiswa berada di `cluster_0` (silhouette -0.138), sedangkan sisanya terpisah sebagai klaster beranggota tunggal. Raihan Aryanova Narendra dan Wildan Haydar Amru selalu terpisah sendiri di semua skenario, sehingga keduanya kemungkinan *outlier* pada 272 fitur. Silhouette klaster beranggota tunggal didefinisikan 0, sehingga nilai *overall* ditentukan hampir sepenuhnya oleh klaster besar yang bernilai negatif (k=3) atau mendekati nol (k=5).
 4. **Kemungkinan penyebab lain**: jumlah fitur (272) jauh lebih besar dari jumlah data (19), sehingga jarak Euclidean menjadi kurang membedakan (*curse of dimensionality*). Data yang digunakan juga belum tentu memiliki kelompok alami.
+
+---
+# Tugas 5 - Preprocessing untuk Outlier dan Polinomial
+
+## Preprocessing: Penanganan Outliers dan Interpolasi Polinomial
+
+Sebelum dilakukan analisis lebih lanjut, data polutan Burneh periode 24 Agustus 2025 – 23 Agustus 2026 perlu melalui tahap preprocessing. Data hasil crawling memiliki dua masalah utama: banyak nilai kosong (missing value) dan adanya outlier. Outlier perlu ditangani karena nilai yang menyimpang jauh dapat memengaruhi hasil analisis, salah satunya pada proses clustering.
+
+Deteksi outlier dilakukan menggunakan metode **Interquartile Range (IQR)**. Data diurutkan, lalu dihitung kuartil pertama (Q1) dan kuartil ketiga (Q3). Nilai yang berada di luar batas bawah dan batas atas dianggap sebagai outlier:
+
+```text
+IQR = Q3 - Q1
+
+Batas bawah = Q1 - 1.5 × IQR
+Batas atas  = Q3 + 1.5 × IQR
+```
+
+Nilai yang terdeteksi sebagai outlier kemudian diubah menjadi `NaN` (diperlakukan sebagai missing value) dan diisi menggunakan **interpolasi polinomial orde 1** (`method='polynomial', order=1`), yaitu memperkirakan nilai kosong berdasarkan nilai di sekitarnya. Pada bagian tepi data yang tidak dapat diinterpolasi, digunakan `bfill()` (mengisi dari nilai sesudahnya) dan `ffill()` (mengisi dari nilai sebelumnya).
+
+Karena nilai hasil interpolasi dapat mengubah distribusi data, proses deteksi outlier diulang secara **iteratif** (menggunakan loop) sampai tidak ditemukan outlier lagi.
+
+### 1. Karbon Monoksida (CO)
+
+Data CO terlebih dahulu diperiksa untuk mengetahui adanya nilai yang termasuk outlier. Deteksi outlier dilakukan menggunakan metode IQR. Dari 365 hari data, terdapat 160 data asli dan 205 data kosong. Setelah dihitung, ditemukan 1 outlier pada data CO.
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Load data raw CO dari hasil crawler
+df = pd.read_csv("co_burneh_raw.csv")
+df['date'] = pd.to_datetime(df['date'])
+df = df.sort_values('date').reset_index(drop=True)
+df['CO'] = pd.to_numeric(df['CO'], errors='coerce')
+
+# 2. Hitung IQR
+Q1 = df['CO'].quantile(0.25)
+Q3 = df['CO'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# 3. Filter outlier
+outliers_iqr = df[(df['CO'] &lt; lower_bound) | (df['CO'] &gt; upper_bound)]
+print("Jumlah Outlier CO (IQR):", len(outliers_iqr))
+```
+
+Output:
+
+```text
+Jumlah Outlier CO (IQR): 1
+```
+
+Berikut visualisasi posisi outlier pada data CO:
+
+![outlier co](../img/tugas5/prepo/outlierdataco.png)
+```python
+plt.figure(figsize=(15, 5))
+plt.plot(df['date'], df['CO'], label="CO", linewidth=1)
+plt.scatter(outliers_iqr['date'], outliers_iqr['CO'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Deteksi Outlier Data CO (Metode IQR)")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar CO")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df['date'].iloc[0], df['date'].iloc[-1]],
+           labels=[df['date'].iloc[0].date(), df['date'].iloc[-1].date()])
+plt.show()
+```
+
+Outlier dan data kosong kemudian dibersihkan dengan interpolasi polinomial secara iteratif sampai tidak ada outlier tersisa:
+
+```python
+df['CO_filled'] = df['CO'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    # 1. Hitung ulang kuartil dan batas IQR berdasarkan data saat ini
+    Q1 = df['CO_filled'].quantile(0.25)
+    Q3 = df['CO_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # 2. Deteksi lokasi outlier
+    outliers = (df['CO_filled'] &lt; lower_bound) | (df['CO_filled'] &gt; upper_bound)
+
+    # Jika sudah tidak ada outlier yang terdeteksi, hentikan perulangan
+    if not outliers.any():
+        break
+
+    # 3. Mask nilai outlier menjadi NaN, lalu isi dengan interpolasi polinomial + bfill + ffill
+    df['CO_filled'] = df['CO_filled'].mask(outliers)
+    df['CO_filled'] = df['CO_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# 4. Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_co = pd.DataFrame({"date": df['date'], "CO": df['CO_filled']})
+df_co.to_csv("co_burneh_clean.csv", index=False)
+print("Data CO berhasil diproses dan disimpan ke co_burneh_clean.csv")
+```
+
+Output:
+
+```text
+Data CO berhasil diproses dan disimpan ke co_burneh_clean.csv
+```
+
+Hasil akhir divisualisasikan untuk memastikan data sudah bersih dari outlier:
+
+![intepolasi co](../img/tugas5/prepo/interpolasidataco.png)
+
+```python
+df_co_final = pd.read_csv("co_burneh_clean.csv")
+df_co_final['date'] = pd.to_datetime(df_co_final['date'])
+
+Q1 = df_co_final['CO'].quantile(0.25)
+Q3 = df_co_final['CO'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_co_final[(df_co_final['CO'] &lt; lower_bound) | (df_co_final['CO'] &gt; upper_bound)]
+
+plt.figure(figsize=(15, 5))
+plt.plot(df_co_final['date'], df_co_final['CO'], label="CO", linewidth=1, color='green')
+plt.scatter(outliers_iqr['date'], outliers_iqr['CO'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Visualisasi Data CO Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar CO")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_co_final['date'].iloc[0], df_co_final['date'].iloc[-1]],
+           labels=[df_co_final['date'].iloc[0].date(), df_co_final['date'].iloc[-1].date()])
+plt.show()
+```
+
+### 2. Nitrogen Dioksida (NO₂)
+
+Proses yang sama dilakukan pada data NO₂. Dari 365 hari, terdapat 124 data asli dan 241 data kosong. Hasil deteksi IQR menunjukkan 1 outlier pada data NO₂.
+
+```python
+# 1. Load data raw NO2
+df_no2 = pd.read_csv("no2_burneh_raw.csv")
+df_no2['date'] = pd.to_datetime(df_no2['date'])
+df_no2 = df_no2.sort_values('date').reset_index(drop=True)
+df_no2['NO2'] = pd.to_numeric(df_no2['NO2'], errors='coerce')
+
+# 2. Hitung IQR
+Q1 = df_no2['NO2'].quantile(0.25)
+Q3 = df_no2['NO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# 3. Filter outlier
+outliers_iqr = df_no2[(df_no2['NO2'] &lt; lower_bound) | (df_no2['NO2'] &gt; upper_bound)]
+print("Jumlah Outlier NO2 (IQR):", len(outliers_iqr))
+```
+
+Output:
+
+```text
+Jumlah Outlier NO2 (IQR): 1
+```
+![outlier no](../img/tugas5/prepo/outlierdatano2.png)
+```python
+plt.figure(figsize=(15, 5))
+plt.plot(df_no2['date'], df_no2['NO2'], label="NO2", linewidth=1)
+plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Deteksi Outlier Data NO2 (Metode IQR)")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar NO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_no2['date'].iloc[0], df_no2['date'].iloc[-1]],
+           labels=[df_no2['date'].iloc[0].date(), df_no2['date'].iloc[-1].date()])
+plt.show()
+```
+
+Pembersihan outlier dan pengisian data kosong dilakukan dengan interpolasi polinomial orde 1 secara iteratif:
+
+```python
+df_no2['NO2_filled'] = df_no2['NO2'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    Q1 = df_no2['NO2_filled'].quantile(0.25)
+    Q3 = df_no2['NO2_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    outliers = (df_no2['NO2_filled'] &lt; lower_bound) | (df_no2['NO2_filled'] &gt; upper_bound)
+    if not outliers.any():
+        break
+
+    df_no2['NO2_filled'] = df_no2['NO2_filled'].mask(outliers)
+    df_no2['NO2_filled'] = df_no2['NO2_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_no2_clean = pd.DataFrame({"date": df_no2['date'], "NO2": df_no2['NO2_filled']})
+df_no2_clean.to_csv("no2_burneh_clean.csv", index=False)
+print("Data NO2 berhasil diproses dan disimpan ke no2_burneh_clean.csv")
+```
+
+Output:
+
+```text
+Data NO2 berhasil diproses dan disimpan ke no2_burneh_clean.csv
+```
+![interpolasi no2](../img/tugas5/prepo/interpolasidatano2.png)
+
+```python
+df_no2_final = pd.read_csv("no2_burneh_clean.csv")
+df_no2_final['date'] = pd.to_datetime(df_no2_final['date'])
+
+Q1 = df_no2_final['NO2'].quantile(0.25)
+Q3 = df_no2_final['NO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_no2_final[(df_no2_final['NO2'] &lt; lower_bound) | (df_no2_final['NO2'] &gt; upper_bound)]
+
+plt.figure(figsize=(15, 5))
+plt.plot(df_no2_final['date'], df_no2_final['NO2'], label="NO2", linewidth=1, color='green')
+plt.scatter(outliers_iqr['date'], outliers_iqr['NO2'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Visualisasi Data NO2 Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar NO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_no2_final['date'].iloc[0], df_no2_final['date'].iloc[-1]],
+           labels=[df_no2_final['date'].iloc[0].date(), df_no2_final['date'].iloc[-1].date()])
+plt.show()
+```
+
+### 3. Sulfur Dioksida (SO₂)
+
+Pada data SO₂ terdapat 170 data asli dan 195 data kosong dari total 365 hari. Deteksi IQR menemukan 9 outlier, lebih banyak dibanding polutan lainnya.
+
+```python
+# 1. Load data raw SO2
+df_so2 = pd.read_csv("so2_burneh_raw.csv")
+df_so2['date'] = pd.to_datetime(df_so2['date'])
+df_so2 = df_so2.sort_values('date').reset_index(drop=True)
+df_so2['SO2'] = pd.to_numeric(df_so2['SO2'], errors='coerce')
+
+# 2. Hitung IQR
+Q1 = df_so2['SO2'].quantile(0.25)
+Q3 = df_so2['SO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# 3. Filter outlier
+outliers_iqr = df_so2[(df_so2['SO2'] &lt; lower_bound) | (df_so2['SO2'] &gt; upper_bound)]
+print("Jumlah Outlier SO2 (IQR):", len(outliers_iqr))
+```
+
+Output:
+
+```text
+Jumlah Outlier SO2 (IQR): 9
+```
+![outlier so2](../img/tugas5/prepo/outlierdataso2.png)
+```python
+plt.figure(figsize=(15, 5))
+plt.plot(df_so2['date'], df_so2['SO2'], label="SO2", linewidth=1)
+plt.scatter(outliers_iqr['date'], outliers_iqr['SO2'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Deteksi Outlier Data SO2 (Metode IQR)")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar SO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_so2['date'].iloc[0], df_so2['date'].iloc[-1]],
+           labels=[df_so2['date'].iloc[0].date(), df_so2['date'].iloc[-1].date()])
+plt.show()
+```
+
+Karena jumlah outliernya lebih banyak, proses iteratif interpolasi akan bekerja lebih lama sampai semua outlier benar-benar habis:
+
+```python
+df_so2['SO2_filled'] = df_so2['SO2'].copy()
+
+# Looping iteratif untuk outlier sampai habis
+while True:
+    Q1 = df_so2['SO2_filled'].quantile(0.25)
+    Q3 = df_so2['SO2_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    outliers = (df_so2['SO2_filled'] &lt; lower_bound) | (df_so2['SO2_filled'] &gt; upper_bound)
+    if not outliers.any():
+        break
+
+    df_so2['SO2_filled'] = df_so2['SO2_filled'].mask(outliers)
+    df_so2['SO2_filled'] = df_so2['SO2_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_so2_clean = pd.DataFrame({"date": df_so2['date'], "SO2": df_so2['SO2_filled']})
+df_so2_clean.to_csv("so2_burneh_clean.csv", index=False)
+print("Data SO2 berhasil diproses dan disimpan ke so2_burneh_clean.csv")
+```
+
+Output:
+
+```text
+Data SO2 berhasil diproses dan disimpan ke so2_burneh_clean.csv
+```
+![interpolasi so2](../img/tugas5/prepo/interpolasidataso2.png)
+
+```python
+df_so2_final = pd.read_csv("so2_burneh_clean.csv")
+df_so2_final['date'] = pd.to_datetime(df_so2_final['date'])
+
+Q1 = df_so2_final['SO2'].quantile(0.25)
+Q3 = df_so2_final['SO2'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_so2_final[(df_so2_final['SO2'] &lt; lower_bound) | (df_so2_final['SO2'] &gt; upper_bound)]
+
+plt.figure(figsize=(15, 5))
+plt.plot(df_so2_final['date'], df_so2_final['SO2'], label="SO2", linewidth=1, color='green')
+plt.scatter(outliers_iqr['date'], outliers_iqr['SO2'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Visualisasi Data SO2 Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar SO2")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_so2_final['date'].iloc[0], df_so2_final['date'].iloc[-1]],
+           labels=[df_so2_final['date'].iloc[0].date(), df_so2_final['date'].iloc[-1].date()])
+plt.show()
+```
+
+### 4. Metana (CH₄)
+
+Data CH₄ memiliki kondisi yang berbeda: dari 365 hari hanya terdapat 9 data asli dan 356 data kosong, dengan 2 outlier terdeteksi. Karena jumlah data aslinya sangat sedikit, sebagian besar nilai pada hasil akhir merupakan hasil interpolasi, sehingga interpretasi terhadap data CH₄ perlu dilakukan secara hati-hati.
+
+```python
+# 1. Load data raw CH4
+df_ch4 = pd.read_csv("ch4_burneh_raw.csv")
+df_ch4['date'] = pd.to_datetime(df_ch4['date'])
+df_ch4 = df_ch4.sort_values('date').reset_index(drop=True)
+df_ch4['CH4'] = pd.to_numeric(df_ch4['CH4'], errors='coerce')
+
+# 2. Hitung IQR
+Q1 = df_ch4['CH4'].quantile(0.25)
+Q3 = df_ch4['CH4'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# 3. Filter outlier
+outliers_iqr = df_ch4[(df_ch4['CH4'] &lt; lower_bound) | (df_ch4['CH4'] &gt; upper_bound)]
+print("Jumlah Outlier CH4 (IQR):", len(outliers_iqr))
+```
+
+Output:
+
+```text
+Jumlah Outlier CH4 (IQR): 2
+```
+![outlier ch4](../img/tugas5/prepo/outlierdatach4.png)
+```python
+plt.figure(figsize=(15, 5))
+plt.plot(df_ch4['date'], df_ch4['CH4'], label="CH4", linewidth=1)
+plt.scatter(outliers_iqr['date'], outliers_iqr['CH4'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Deteksi Outlier Data CH4 (Metode IQR)")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar CH4")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_ch4['date'].iloc[0], df_ch4['date'].iloc[-1]],
+           labels=[df_ch4['date'].iloc[0].date(), df_ch4['date'].iloc[-1].date()])
+plt.show()
+```
+
+Proses pembersihan tetap menggunakan interpolasi polinomial orde 1 secara iteratif seperti polutan lainnya:
+
+```python
+df_ch4['CH4_filled'] = df_ch4['CH4'].copy()
+
+# Looping iteratif untuk membersihkan outlier sampai benar-benar habis
+while True:
+    Q1 = df_ch4['CH4_filled'].quantile(0.25)
+    Q3 = df_ch4['CH4_filled'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    outliers = (df_ch4['CH4_filled'] &lt; lower_bound) | (df_ch4['CH4_filled'] &gt; upper_bound)
+    if not outliers.any():
+        break
+
+    df_ch4['CH4_filled'] = df_ch4['CH4_filled'].mask(outliers)
+    df_ch4['CH4_filled'] = df_ch4['CH4_filled'].interpolate(method='polynomial', order=1).bfill().ffill()
+
+# Simpan hasil akhir ke DataFrame baru dan ekspor ke CSV
+df_ch4_clean = pd.DataFrame({"date": df_ch4['date'], "CH4": df_ch4['CH4_filled']})
+df_ch4_clean.to_csv("ch4_burneh_clean.csv", index=False)
+print("Data CH4 berhasil diproses dan disimpan ke ch4_burneh_clean.csv")
+```
+
+Output:
+
+```text
+Data CH4 berhasil diproses dan disimpan ke ch4_burneh_clean.csv
+```
+![interpolasi co](../img/tugas5/prepo/interpolasidatach4.png)
+
+```python
+df_ch4_final = pd.read_csv("ch4_burneh_clean.csv")
+df_ch4_final['date'] = pd.to_datetime(df_ch4_final['date'])
+
+Q1 = df_ch4_final['CH4'].quantile(0.25)
+Q3 = df_ch4_final['CH4'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers_iqr = df_ch4_final[(df_ch4_final['CH4'] &lt; lower_bound) | (df_ch4_final['CH4'] &gt; upper_bound)]
+
+plt.figure(figsize=(15, 5))
+plt.plot(df_ch4_final['date'], df_ch4_final['CH4'], label="CH4", linewidth=1, color='green')
+plt.scatter(outliers_iqr['date'], outliers_iqr['CH4'],
+            color="red", marker='o', label="Outliers")
+plt.axhline(upper_bound, color='orange', linestyle='dashed', label="Upper Bound (IQR)")
+plt.axhline(lower_bound, color='blue', linestyle='dashed', label="Lower Bound (IQR)")
+plt.title("Visualisasi Data CH4 Setelah Interpolasi")
+plt.xlabel("Tanggal")
+plt.ylabel("Kadar CH4")
+plt.legend()
+plt.tight_layout()
+plt.xticks(ticks=[df_ch4_final['date'].iloc[0], df_ch4_final['date'].iloc[-1]],
+           labels=[df_ch4_final['date'].iloc[0].date(), df_ch4_final['date'].iloc[-1].date()])
+plt.show()
+```
+
+### 5. Penggabungan Data Polutan
+
+Setelah keempat polutan selesai diproses, data yang sudah bersih digabungkan berdasarkan kolom `date` menjadi satu dataset gabungan dengan struktur `date | CO | NO2 | SO2 | CH4`, sehingga dapat digunakan sebagai input untuk analisis berikutnya (K-Means Clustering).
+
+```python
+df_co  = pd.read_csv("co_burneh_clean.csv")
+df_no2 = pd.read_csv("no2_burneh_clean.csv")
+df_so2 = pd.read_csv("so2_burneh_clean.csv")
+df_ch4 = pd.read_csv("ch4_burneh_clean.csv")
+
+# Gabungkan berdasarkan tanggal
+df_merged = (df_co
+             .merge(df_no2, on='date')
+             .merge(df_so2, on='date')
+             .merge(df_ch4, on='date'))
+
+df_merged.to_csv("burneh_merged.csv", index=False)
+print(df_merged.head())
+```
+
+### 6. K-Means Clustering (KNIME)
+
+Setelah data 4 polutan digabung menjadi 272 fitur per mahasiswa (hasil preprocessing polinomial), dilakukan klastering menggunakan algoritma K-Means di KNIME Analytics Platform, membandingkan 3 skenario reduksi dimensi (tanpa PCA, PCA 10 komponen, PCA 5 komponen), masing-masing diuji dengan k=3 dan k=5.
+
+Alur Kerja (Workflow) di KNIME:
+```
+Excel Reader
+    -> Column Filter (buang Nama, Daerah)
+    -> [Skenario 1: Tanpa PCA (272 fitur) -> k-Means]
+    -> [Skenario 2: PCA (10 komponen) -> k-Means]
+    -> [Skenario 3: PCA (5 komponen) -> k-Means]
+Tiap k-Means dijalankan k=3 dan k=5, lalu bercabang dua:
+    k-Means -> Silhouette Coefficient -> Table View
+    k-Means -> Joiner (+ Excel Reader) -> Python Script -> Scatter Plot
+```
+Catatan Implementasi KNIME: Pada Skenario 2 dan 3, opsi 'Remove original data columns' diaktifkan pada node PCA untuk memastikan fitur dimensi tinggi benar-benar tereduksi dan tidak mengalami penumpukan (lossless) seperti pada Tugas 4 sebelumnya.
+
+[fotocollab]
+(gambar: grid 6 scatter plot hasil ekspor Colab, urutan baris atas k3_nopca/k3_pca5/k3_pca10, baris bawah k5_nopca/k5_pca5/k5_pca10)
+
+Hasil Evaluasi & Analisis Nilai Silhouette Coefficient:
+
+| Skenario Fitur | Overall k=3 | Overall k=5 |
+|---|---|---|
+| Skenario 1: Tanpa PCA (272 Fitur) | 0.491 | 0.419 |
+| Skenario 2: PCA 10 Komponen | 0.491 | 0.419 |
+| Skenario 3: PCA 5 Komponen | 0.504 | 0.434 |
+
+[fotosilhouseskenario1]
+(gambar: Table View Silhouette - Skenario Tanpa PCA, hasil k3_nopca dan k5_nopca)
+
+[fotosilhouseskenario2]
+(gambar: Table View Silhouette - Skenario PCA 10 Komponen, hasil k3_pca10 dan k5_pca10)
+
+[fotosilhouseskenario3]
+(gambar: Table View Silhouette - Skenario PCA 5 Komponen, hasil k3_pca5 dan k5_pca5)
+
+Catatan penting: seluruh nilai Silhouette di sini (0.419-0.504) melonjak jauh lebih tinggi dibanding Tugas 4 sebelumnya (overall hanya berkisar -0.123 s.d. 0.01). Ini bukan efek dari reduksi PCA, melainkan dampak dari preprocessing polinomial yang menciptakan struktur data jauh lebih terpisah rapi sejak awal.
+
+Analisis Grafik Sebaran & Pembuktian Hipotesis:
+
+A. Analisis Efek Curse of Dimensionality (Tanpa PCA)
+
+Skenario tanpa PCA (272 fitur) tidak menunjukkan tanda curse of dimensionality yang merusak struktur data. Nilai overall silhouette-nya tetap kompetitif (0.491 pada k=3 dan 0.419 pada k=5). Ini mengindikasikan bahwa setelah preprocessing polinomial, 272 fitur asli sudah bersifat sangat informatif untuk membentuk klaster yang solid secara mandiri.
+
+B. Pengaruh Reduksi Dimensi PCA Bertingkat (PCA 10 vs PCA 5)
+
+1. PCA 10 Komponen: menghasilkan nilai Overall Silhouette yang identik persis dengan skenario tanpa PCA, baik pada k=3 (0.491 = 0.491) maupun k=5 (0.419 = 0.419). Ini membuktikan bahwa 10 komponen utama sudah mampu menangkap hampir seluruh variansi penting data, sehingga reduksi ke titik ini belum memberikan dampak perubahan kualitas yang berarti.
+2. PCA 5 Komponen: reduksi yang lebih agresif ke 5 komponen justru memberikan peningkatan performa yang konsisten pada kedua nilai k - naik menjadi 0.504 pada k=3 (dari 0.491) dan naik menjadi 0.434 pada k=5 (dari 0.419). Ini menandakan pemangkasan dimensi lebih dalam berhasil mengeliminasi noise/variansi minor pengganggu, membuat batas klaster sedikit lebih bersih.
+3. Pergeseran Anggota Klaster: pergeseran posisi titik mahasiswa terlihat jelas pada scatter plot antarskenario, membuktikan proses PCA yang dijalankan dengan opsi pembuangan kolom asli ini benar-benar bersifat lossy (berbeda dari Tugas 4 yang lossless akibat jumlah komponen PCA = 19 identik dengan jumlah sampel).
+
+Kesimpulan:
+
+Reduksi dimensi PCA secara bertingkat terbukti bersifat lossy dan memengaruhi persebaran keanggotaan klaster mahasiswa, dengan pola peningkatan yang konsisten di kedua nilai k. Skenario optimal terbaik secara matematis ditemukan pada Skenario PCA 5 Komponen dengan k=3, menghasilkan Overall Silhouette tertinggi sebesar 0.504.
+
+Namun, temuan paling signifikan dari eksperimen ini adalah perbandingan inter-tugas: metode pra-pemrosesan data (kombinasi IQR iteratif + interpolasi polinomial) pada Tugas 5 terbukti memberikan pengaruh perbaikan kualitas klastering yang jauh lebih besar (melompat ke rentang 0.42-0.50) dibandingkan metode seasonal+subset-IQR pada Tugas 4 sebelumnya (bernilai negatif/mendekati 0). Ini menunjukkan bahwa ketepatan strategi pembersihan data awal memegang peran jauh lebih vital dalam menentukan keberhasilan klasterisasi dibandingkan penentuan jumlah komponen reduksi PCA itu sendiri.
+
+# Klasifikasi Spasial Lahan Sawah dan Non-Sawah
+
+Bagian ini mendokumentasikan tahapan akuisisi citra satelit optik **Sentinel-2A (Level-2A)** dalam format GeoTIFF (`.tif`) melalui **openEO**, ekstraksi nilai spektral seluruh piksel pada **100 poligon sampel** (50 Sawah dan 50 Non-Sawah) di **Kecamatan Baron, Kabupaten Nganjuk** yang telah dilabeli melalui **QGIS**, hingga pemodelan klasifikasi biner (2 kelas) menggunakan **Random Forest**. Evaluasi dilakukan per poligon dengan **GroupKFold** dan menghasilkan akurasi **89,04%**.
+
+## Instalasi Library Yang Digunakan
+
+```
+pip install geopandas
+```
+
+```
+pip install openeo
+```
+
+```
+pip install scikit-learn
+```
+
+```
+pip install rasterio
+```
+
+```
+pip install matplotlib
+```
+
+## 1. Desain Pengambilan Sampel (Ground Truth)
+
+Pengambilan sampel dilakukan secara spasial dengan membagi objek pengamatan ke dalam dua kelas seimbang (*balanced dataset*) dalam format vektor `GeoJSON`. Setiap sampel berupa poligon, bukan titik, sehingga satu sampel mencakup banyak piksel Sentinel-2.
+
+| Kelas Target  | Kode Label | Jumlah Sampel   | Karakteristik Objek                                                         |
+| ------------- | ---------- | --------------- | --------------------------------------------------------------------------- |
+| **Sawah**     | `1`        | 50 Poligon      | Petak lahan persawahan; poligon bernama `s` + nomor (misal `s1`)            |
+| **Non-Sawah** | `0`        | 50 Poligon      | Seluruh penutup lahan selain sawah (heterogen); poligon bernama `r` + nomor |
+| **Total**     | —          | **100 Poligon** | Digabungkan menjadi satu *GeoDataFrame* berproyeksi `EPSG:4326`             |
+
+```python
+import geopandas as gpd
+import openeo
+import pandas as pd
+
+# ==============================================================================
+# 1. BACA GEOJSON, BERSIHKAN NAMA, DAN BERI LABEL OTOMATIS
+# ==============================================================================
+gdf_semua = gpd.read_file("sawah-nonsawah.geojson").to_crs("EPSG:4326")
+
+# Bersihkan nama: hapus spasi/newline, jadikan huruf kecil agar 'S46' ikut terbaca
+gdf_semua["Nama"] = gdf_semua["Nama"].astype(str).str.strip().str.lower()
+
+# Buang baris yang bukan sampel (batas kecamatan)
+gdf_semua = gdf_semua[~gdf_semua["Nama"].str.startswith("kecamatan")].copy()
+
+# Regex: huruf s/r diikuti angka, supaya nama lain tidak ikut tertangkap
+gdf_sawah = gdf_semua[gdf_semua["Nama"].str.match(r"^s\d+$")].copy()
+gdf_nonsawah = gdf_semua[gdf_semua["Nama"].str.match(r"^r\d+$")].copy()
+
+gdf_sawah["label_teks"], gdf_sawah["label"] = "Sawah", 1
+gdf_nonsawah["label_teks"], gdf_nonsawah["label"] = "Non-Sawah", 0
+
+# Gabungkan keduanya menjadi 1 GeoDataFrame (50 + 50 = 100 sampel)
+gdf_gabungan = gpd.GeoDataFrame(
+    pd.concat([gdf_sawah, gdf_nonsawah], ignore_index=True), crs="EPSG:4326"
+)
+
+# Cek: baris yang tidak masuk kelas mana pun (harus kosong)
+sisa = gdf_semua[~gdf_semua.index.isin(list(gdf_sawah.index) + list(gdf_nonsawah.index))]
+print("Tak terlabeli:", sisa["Nama"].tolist())
+print(f"Sawah: {len(gdf_sawah)} | Non-Sawah: {len(gdf_nonsawah)} | Total: {len(gdf_gabungan)}")
+
+# ==============================================================================
+# 2. AMBIL BATAS KOORDINAT GABUNGAN (BOUNDING BOX) UNTUK OPENEO
+# ==============================================================================
+minx, miny, maxx, maxy = gdf_gabungan.total_bounds
+buffer_deg = 0.005  # Margin ~500 meter agar poligon di tepi tetap masuk citra
+
+bbox = {
+    "west": float(minx - buffer_deg),
+    "south": float(miny - buffer_deg),
+    "east": float(maxx + buffer_deg),
+    "north": float(maxy + buffer_deg),
+}
+print("Bounding Box Gabungan:", bbox)
+
+# ==============================================================================
+# 3. KONEKSI KE OPENEO & UNDUH SENTINEL-2A FORMAT GEOTIFF (.tif)
+# ==============================================================================
+conn = openeo.connect("openeo.dataspace.copernicus.eu")
+conn.authenticate_oidc()  # Akan meminta login ke akun Copernicus
+
+datacube = conn.load_collection(
+    "SENTINEL2_L2A",
+    spatial_extent=bbox,
+    temporal_extent=["2026-05-01", "2026-09-30"],
+    bands=["B02", "B03", "B04", "B08", "B11"],  # Blue, Green, Red, NIR, SWIR
+    max_cloud_cover=10,
+)
+
+# Ambil median waktu agar bebas tutupan awan
+composite_s2 = datacube.median_time()
+
+nama_tif = "sentinel2_sawah_nonsawah.tif"
+print("Mengunduh citra Sentinel-2A (.tif)...")
+composite_s2.download(nama_tif, format="GTiff")
+print(f"Berhasil diunduh: {nama_tif}")
+```
+
+**Output:**
+
+```
+Tak terlabeli: []
+Sawah: 50 | Non-Sawah: 50 | Total: 100
+Bounding Box Gabungan: [ISI: salin dari output notebook]
+Authenticated using refresh token.
+Mengunduh citra Sentinel-2A (.tif)...
+Berhasil diunduh: sentinel2_sawah_nonsawah.tif
+```
+
+## 2. Akuisisi Citra Sentinel-2A (`.tif`) via openEO dan Ekstraksi Fitur
+
+Akuisisi citra dilakukan menggunakan *bounding box* gabungan dari ke-100 poligon sampel pada koleksi **`SENTINEL2_L2A`** (*Bottom-of-Atmosphere Reflectance*) dengan batas tutupan awan maksimum `< 10%` pada periode 1 Mei 2026 sampai 30 September 2026, dan agregasi temporal `median_time()` untuk menghasilkan komposit citra bebas awan. Seluruh piksel di dalam setiap poligon kemudian diekstrak sehingga satu piksel menjadi satu baris data.
+
+### Fitur Spektral dan Indeks Turunan yang Diekstrak:
+
+1. **Band Spektral Utama:**
+
+   - `B02` (*Blue* - 490 nm), `B03` (*Green* - 560 nm), `B04` (*Red* - 665 nm) untuk memisahkan vegetasi, tanah, dan air pada spektrum tampak.
+
+   - `B08` (*Near Infrared / NIR* - 842 nm) untuk mendeteksi pantulan klorofil tanaman padi.
+
+   - `B11` (*Short-Wave Infrared / SWIR* - 1610 nm) untuk mendeteksi kelembapan tanah dan genangan air.
+
+2. **Normalized Difference Vegetation Index (NDVI):**
+
+   $$\text{NDVI} = \frac{B08 - B04}{B08 + B04}$$
+
+3. **Normalized Difference Water Index (NDWI):**
+
+   $$\text{NDWI} = \frac{B03 - B08}{B03 + B08}$$
+
+4. **Modified NDWI (MNDWI)**, mendeteksi air menggunakan SWIR:
+
+   $$\text{MNDWI} = \frac{B03 - B11}{B03 + B11}$$
+
+5. **Normalized Difference Moisture Index (NDMI)**, mendeteksi kelembapan:
+
+   $$\text{NDMI} = \frac{B08 - B11}{B08 + B11}$$
+
+```python
+import numpy as np
+import pandas as pd
+import rasterio
+from rasterio.mask import mask
+
+# ==============================================================================
+# 1. EKSTRAKSI SEMUA PIKSEL DI DALAM SETIAP POLIGON
+# ==============================================================================
+baris = []
+
+with rasterio.open("sentinel2_sawah_nonsawah.tif") as src:
+    gdf_proj = gdf_gabungan.to_crs(src.crs)  # samakan CRS dengan citra
+
+    for idx, row in gdf_proj.iterrows():
+        try:
+            # nodata=0 (bukan NaN) karena citra bertipe int16
+            arr, _ = mask(src, [row.geometry], crop=True, nodata=0, filled=True)
+        except ValueError:
+            continue  # poligon di luar citra, lewati
+
+        arr = arr.astype(float)                     # (5 band, h, w)
+        piksel = arr.reshape(arr.shape[0], -1).T    # (jumlah piksel, 5 band)
+        piksel = piksel[(piksel > 0).all(axis=1)]   # buang piksel kosong/0
+
+        # Tiap piksel jadi 1 baris, bawa ID poligon sebagai grup
+        for p in piksel:
+            baris.append([*p, row["label_teks"], idx])
+
+df = pd.DataFrame(baris, columns=["B02", "B03", "B04", "B08", "B11", "Kelas", "poligon_id"])
+
+# ==============================================================================
+# 2. TAMBAHKAN FITUR INDEKS: NDVI, NDWI, MNDWI, NDMI
+# ==============================================================================
+df["NDVI"] = (df["B08"] - df["B04"]) / (df["B08"] + df["B04"] + 1e-6)
+df["NDWI"] = (df["B03"] - df["B08"]) / (df["B03"] + df["B08"] + 1e-6)
+df["MNDWI"] = (df["B03"] - df["B11"]) / (df["B03"] + df["B11"] + 1e-6)
+df["NDMI"] = (df["B08"] - df["B11"]) / (df["B08"] + df["B11"] + 1e-6)
+
+print("Jumlah piksel per kelas:\n", df["Kelas"].value_counts())
+print("Jumlah poligon per kelas:\n", df.groupby("Kelas")["poligon_id"].nunique())
+print(df.groupby("Kelas")[["NDVI", "NDWI", "MNDWI", "NDMI"]].agg(["mean", "std"]))
+```
+
+**Output:**
+
+```
+Jumlah piksel per kelas:
+ Kelas
+Non-Sawah    546
+Sawah        485
+Name: count, dtype: int64
+Jumlah poligon per kelas:
+ Kelas
+Non-Sawah    50
+Sawah        50
+Name: poligon_id, dtype: int64
+               NDVI                NDWI               MNDWI            \
+               mean       std      mean       std      mean       std   
+Kelas                                                                   
+Non-Sawah  0.458490  0.267707 -0.476004  0.190672 -0.480469  0.117951   
+Sawah      0.471581  0.095156 -0.491723  0.059725 -0.466546  0.083033   
+
+               NDMI            
+               mean       std  
+Kelas                          
+Non-Sawah  0.015645  0.165986  
+Sawah      0.030347  0.109113  
+```
+
+Rata-rata NDVI kedua kelas hampir sama, tetapi simpangan baku Non-Sawah (0,268) jauh lebih besar daripada Sawah (0,095). Artinya kelas Non-Sawah berisi objek yang sangat beragam, dari bangunan dan jalan (NDVI rendah) hingga kebun dan semak (NDVI tinggi).
+
+## 3. Hasil Evaluasi Klasifikasi 2 Kelas (Random Forest)
+
+Dataset berisi **1031 piksel** (485 Sawah dan 546 Non-Sawah) yang dievaluasi menggunakan skema **GroupKFold 5-fold** dengan `poligon_id` sebagai grup. Skema ini mencegah kebocoran data: piksel dalam satu poligon saling bertetangga dan bernilai spektral sangat mirip, sehingga bila dibagi acak, piksel dari poligon yang sama dapat berada di data latih dan data uji sekaligus dan membuat akurasi terlalu optimistis. Model yang digunakan adalah Random Forest (200 pohon, `class_weight="balanced"`) dengan 9 fitur (5 band dan 4 indeks).
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GroupKFold, cross_val_predict
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+# ==============================================================================
+# 1. EVALUASI RANDOM FOREST DENGAN GROUPKFOLD (5-FOLD PER POLIGON)
+# ==============================================================================
+fitur = ["B02", "B03", "B04", "B08", "B11", "NDVI", "NDWI", "MNDWI", "NDMI"]
+X, y, grup = df[fitur], df["Kelas"], df["poligon_id"]
+
+# CV per poligon: piksel satu poligon tidak boleh ada di train & test sekaligus
+rf = RandomForestClassifier(
+    n_estimators=200, class_weight="balanced", random_state=42, n_jobs=-1
+)
+y_pred = cross_val_predict(rf, X, y, groups=grup, cv=GroupKFold(n_splits=5))
+
+print(f"Akurasi (GroupKFold): {accuracy_score(y, y_pred)*100:.2f}%")
+print(confusion_matrix(y, y_pred))
+print(classification_report(y, y_pred))
+
+# ==============================================================================
+# 2. POLIGON DENGAN AKURASI PIKSEL TERENDAH (KANDIDAT LABEL BERMASALAH)
+# ==============================================================================
+df["benar"] = (y_pred == y.values)
+salah = df.groupby(["poligon_id", "Kelas"])["benar"].mean().reset_index()
+salah["nama"] = salah["poligon_id"].map(gdf_gabungan["Nama"])
+print("\nPoligon dengan akurasi piksel terendah:")
+print(salah.sort_values("benar").head(10))
+```
+
+**Output:**
+
+```
+Akurasi (GroupKFold): 89.04%
+[[479  67]
+ [ 46 439]]
+              precision    recall  f1-score   support
+
+   Non-Sawah       0.91      0.88      0.89       546
+       Sawah       0.87      0.91      0.89       485
+
+    accuracy                           0.89      1031
+   macro avg       0.89      0.89      0.89      1031
+weighted avg       0.89      0.89      0.89      1031
+
+
+Poligon dengan akurasi piksel terendah:
+    poligon_id      Kelas     benar nama
+1            1      Sawah  0.000000   s2
+68          68  Non-Sawah  0.000000  r19
+42          42      Sawah  0.222222  s43
+0            0      Sawah  0.250000   s1
+5            5      Sawah  0.333333   s6
+50          50  Non-Sawah  0.500000   r1
+64          64  Non-Sawah  0.500000  r15
+3            3      Sawah  0.500000   s4
+76          76  Non-Sawah  0.526316  r27
+74          74  Non-Sawah  0.555556  r25
+```
+
+| Aktual \ Prediksi | Non-Sawah | Sawah |
+| ----------------- | --------- | ----- |
+| **Non-Sawah**     | 479       | 67    |
+| **Sawah**         | 46        | 439   |
+
+```python
+import os
+import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay
+
+os.makedirs("gambar", exist_ok=True)
+
+# ==============================================================================
+# A. VISUALISASI CONFUSION MATRIX & FEATURE IMPORTANCE
+# ==============================================================================
+# Latih model final dengan SEMUA data (CV hanya untuk evaluasi, bukan untuk peta)
+model_final = RandomForestClassifier(
+    n_estimators=200, class_weight="balanced", random_state=42, n_jobs=-1
+)
+model_final.fit(X, y)
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
+
+# 1. Confusion Matrix dari prediksi GroupKFold
+ConfusionMatrixDisplay.from_predictions(y, y_pred, cmap="Greens", ax=axes[0], colorbar=False)
+axes[0].set_title("Confusion Matrix (GroupKFold 5-Fold, 1031 Piksel)")
+
+# 2. Tingkat Kepentingan Fitur dari model final
+importances = model_final.feature_importances_
+indices = np.argsort(importances)
+axes[1].barh(range(len(indices)), importances[indices], color="#2ecc71", edgecolor="black")
+axes[1].set_yticks(range(len(indices)))
+axes[1].set_yticklabels([fitur[i] for i in indices])
+axes[1].set_xlabel("Nilai Kepentingan (Importance)")
+axes[1].set_title("Kontribusi Fitur Spektral Sentinel-2A")
+
+plt.tight_layout()
+plt.savefig("gambar/evaluasi_model.png", dpi=300)
+plt.show()
+
+# ==============================================================================
+# B. PETA KLASIFIKASI RASTER SELURUH CITRA
+# ==============================================================================
+with rasterio.open("sentinel2_sawah_nonsawah.tif") as src:
+    img = src.read().astype(float)   # (5 band, h, w)
+    bounds = src.bounds
+
+b02, b03, b04, b08, b11 = img        # urutan band sama dengan saat unduh
+eps = 1e-6
+
+# Hitung indeks untuk seluruh piksel (urutan harus sama dengan `fitur`)
+ndvi = (b08 - b04) / (b08 + b04 + eps)
+ndwi = (b03 - b08) / (b03 + b08 + eps)
+mndwi = (b03 - b11) / (b03 + b11 + eps)
+ndmi = (b08 - b11) / (b08 + b11 + eps)
+
+stack = np.stack([b02, b03, b04, b08, b11, ndvi, ndwi, mndwi, ndmi], axis=-1)
+h, w, c = stack.shape
+piksel_df = pd.DataFrame(np.nan_to_num(stack.reshape(-1, c)), columns=fitur)  # pakai nama kolom agar tanpa warning
+
+pred = model_final.predict(piksel_df)
+peta = np.where(pred == "Sawah", 1, 0).reshape(h, w)
+
+plt.figure(figsize=(9, 7))
+plt.imshow(peta, cmap=mcolors.ListedColormap(["#e74c3c", "#2ecc71"]),
+           extent=[bounds.left, bounds.right, bounds.bottom, bounds.top])
+plt.legend(handles=[mpatches.Patch(color="#2ecc71", label="Kelas 1: Sawah"),
+                    mpatches.Patch(color="#e74c3c", label="Kelas 0: Non-Sawah")], loc="upper right")
+plt.title("Peta Klasifikasi Sawah vs Non-Sawah (Sentinel-2A)", fontsize=12, fontweight="bold")
+plt.xlabel("Koordinat X / Longitude")
+plt.ylabel("Koordinat Y / Latitude")
+plt.tight_layout()
+plt.savefig("gambar/peta_klasifikasi_raster_sawah.png", dpi=300)
+plt.show()
+```
+
+**Output:**
+
+![Confusion Matrix dan Feature Importance](gambar/evaluasi_model.png)
+
+![Peta Klasifikasi Sawah vs Non-Sawah](gambar/peta_klasifikasi_raster_sawah.png)
+
+## 4. Analisis dan Pembahasan
+
+### 4.1 Hasil Utama
+
+Model memperoleh akurasi **89,04%** dengan precision dan recall yang relatif seimbang antarkelas (0,87 sampai 0,91). Terdapat 67 piksel Non-Sawah yang diprediksi sebagai Sawah dan 46 piksel Sawah yang diprediksi sebagai Non-Sawah. Kesalahan yang hampir seimbang menunjukkan model tidak condong ke satu kelas.
+
+### 4.2 Perbandingan dengan Percobaan Awal
+
+Percobaan awal mengambil satu piksel di titik tengah (*centroid*) setiap poligon dan membagi data secara acak 80:20. Hasilnya hanya 70%, dengan 5 dari 10 sampel Non-Sawah salah diprediksi.
+
+| Aspek                    | Percobaan awal                  | Pendekatan akhir                        |
+| ------------------------ | ------------------------------- | --------------------------------------- |
+| Unit data                | 1 piksel (centroid) per poligon | Seluruh piksel di dalam poligon         |
+| Jumlah data              | 100 sampel                      | 1031 piksel dari 100 poligon            |
+| Skema evaluasi           | *Hold-out* 80:20 (20 data uji)  | GroupKFold 5-fold per poligon           |
+| Fitur                    | 5 band, NDVI, NDWI              | 5 band, NDVI, NDWI, MNDWI, NDMI         |
+| Akurasi                  | 70%                             | 89,04%                                  |
+
+Kedua angka tidak sepenuhnya sebanding karena skema evaluasinya berbeda. Namun, evaluasi awal hanya memakai 20 data uji, sehingga satu kesalahan prediksi mengubah akurasi sebesar 5 poin dan hasilnya tidak stabil. Centroid juga berisiko jatuh di pematang atau tepi objek sehingga mewakili poligon dengan buruk.

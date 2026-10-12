@@ -1,0 +1,1212 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Klasifikasi Spasial Tutupan Lahan (LULC) Jawa Timur (Random Forest &amp; Sentinel-2) &#8212; My sample book</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'md/02_pengganti-uas';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Mulai Menulis" href="01_mulai-disini.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
+    <img src="../_static/logo.png" class="logo__image only-dark pst-js-only" alt="My sample book - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Profile
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="00_pengantar-proyek.html">Business Understanding</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="01_mulai-disini.html">Mulai Menulis</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Klasifikasi Spasial Tutupan Lahan (LULC) Jawa Timur (Random Forest &amp; Sentinel-2)</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Roti18/saintdata" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Roti18/saintdata/issues/new?title=Issue%20on%20page%20%2Fmd/02_pengganti-uas.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/md/02_pengganti-uas.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Klasifikasi Spasial Tutupan Lahan (LULC) Jawa Timur (Random Forest & Sentinel-2)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#instalasi-library-kebutuhan-lingkungan">Instalasi Library &amp; Kebutuhan Lingkungan</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#business-understanding-pemahaman-bisnis">1. Business Understanding (Pemahaman Bisnis)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latar-belakang">1.1. Latar Belakang</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tujuan-proyek">1.2. Tujuan Proyek</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ruang-lingkup-dan-batasan">1.3. Ruang Lingkup dan Batasan</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-understanding-pengumpulan-pemahaman-data">2. Data Understanding (Pengumpulan &amp; Pemahaman Data)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#definisi-5-kelas-tutupan-lahan">2.1. Definisi 5 Kelas Tutupan Lahan</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#citra-sentinel-2-level-2a">2.2. Citra Sentinel-2 Level-2A</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#indeks-spektral">2.3. Indeks Spektral</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-ground-truth">2.4. Dataset Ground Truth</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akuisisi-citra-via-openeo">2.5. Akuisisi Citra via openEO</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-preprocessing-pra-pemrosesan-data">3. Data Preprocessing (Pra-pemrosesan Data)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ekstraksi-piksel-dari-poligon">3.1. Ekstraksi Piksel dari Poligon</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kompresi-spasial-piksel-poligon">3.2. Kompresi Spasial (Piksel → Poligon)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-tekstur-spasial">3.3. Fitur Tekstur Spasial</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pengelompokan-wilayah-untuk-validasi">3.4. Pengelompokan Wilayah untuk Validasi</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modeling-pemodelan-machine-learning">4. Modeling (Pemodelan Machine Learning)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#algoritma-random-forest">4.1. Algoritma Random Forest</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#konfigurasi-model">4.2. Konfigurasi Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ekspor-model">4.3. Ekspor Model</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-evaluasi-model-hasil-klasifikasi">5. Evaluation (Evaluasi Model &amp; Hasil Klasifikasi)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-validasi-antar-wilayah">5.1. Skema Validasi Antar-Wilayah</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-evaluasi">5.2. Hasil Evaluasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#confusion-matrix">5.3. Confusion Matrix</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">5.3. Confusion Matrix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-hasil">5.4. Analisis Hasil</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#riwayat-iterasi">5.5. Riwayat Iterasi</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-model-via-streamlit">6. Deployment (Penyebaran Model via Streamlit)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">6.1. Arsitektur Aplikasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">6.2. Fitur Interaktif Peta</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">6.3. Akses Publik</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="klasifikasi-spasial-tutupan-lahan-lulc-jawa-timur-random-forest-sentinel-2">
+<h1>Klasifikasi Spasial Tutupan Lahan (LULC) Jawa Timur (Random Forest &amp; Sentinel-2)<a class="headerlink" href="#klasifikasi-spasial-tutupan-lahan-lulc-jawa-timur-random-forest-sentinel-2" title="Link to this heading">#</a></h1>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keterangan</p></th>
+<th class="head"><p>Informasi</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Nama</strong></p></td>
+<td><p>Muhammad Fathul Iman Wahid</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>NIM</strong></p></td>
+<td><p>240411100180</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mata Kuliah</strong></p></td>
+<td><p>Proyek Sains Data</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Topik</strong></p></td>
+<td><p>Klasifikasi Tutupan Lahan (LULC) Jawa Timur berbasis Spasial</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Dokumentasi ini menyajikan alur lengkap (<em>end-to-end pipeline</em>) klasifikasi tutupan lahan (<em>Land Use / Land Cover</em> - LULC) di <strong>Provinsi Jawa Timur</strong> berbasis citra satelit multispektral <strong>Sentinel-2 Level-2A</strong> dan algoritma <strong>Random Forest</strong>. Model mengklasifikasikan lahan ke dalam <strong>5 kelas</strong> (Bangunan, Pertanian, Air, Hutan, dan Mangrove) dan dievaluasi dengan <strong>validasi antar-wilayah</strong>, sehingga hasilnya menggambarkan kemampuan model pada lokasi yang belum pernah dilihat.</p>
+<blockquote>
+<div><p>🌐 <strong>Aplikasi Web Interaktif (Streamlit):</strong> <a class="reference external" href="https://dashboard-lulc-jatim.streamlit.app/">https://dashboard-lulc-jatim.streamlit.app/</a>
+Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kinerja model dapat diakses langsung secara publik.</p>
+</div></blockquote>
+<p>Siklus proyek disusun mengikuti metodologi <strong>CRISP-DM</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Business Understanding</strong>: latar belakang, tujuan, dan ruang lingkup pemetaan.</p></li>
+<li><p><strong>Data Understanding</strong>: definisi kelas, karakteristik citra Sentinel-2, indeks spektral, dan sampel <em>ground truth</em>.</p></li>
+<li><p><strong>Data Preprocessing</strong>: ekstraksi piksel, kompresi spasial menjadi poligon, fitur tekstur spasial, dan pengelompokan wilayah.</p></li>
+<li><p><strong>Modeling</strong>: pelatihan model Random Forest dan ekspor model.</p></li>
+<li><p><strong>Evaluation</strong>: validasi antar-wilayah, metrik per kelas, dan analisis kesalahan.</p></li>
+<li><p><strong>Deployment</strong>: dashboard interaktif berbasis Streamlit.</p></li>
+<li><p><strong>Kesimpulan</strong>: ringkasan hasil, keterbatasan, dan saran pengembangan.</p></li>
+</ol>
+<hr class="docutils" />
+<section id="instalasi-library-kebutuhan-lingkungan">
+<h2>Instalasi Library &amp; Kebutuhan Lingkungan<a class="headerlink" href="#instalasi-library-kebutuhan-lingkungan" title="Link to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">openeo</span> <span class="n">geopandas</span> <span class="n">rasterio</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span> <span class="n">pandas</span> <span class="n">numpy</span> <span class="n">folium</span> <span class="n">plotly</span> <span class="n">streamlit</span> <span class="n">joblib</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="business-understanding-pemahaman-bisnis">
+<h2>1. Business Understanding (Pemahaman Bisnis)<a class="headerlink" href="#business-understanding-pemahaman-bisnis" title="Link to this heading">#</a></h2>
+<section id="latar-belakang">
+<h3>1.1. Latar Belakang<a class="headerlink" href="#latar-belakang" title="Link to this heading">#</a></h3>
+<p>Pemetaan tutupan lahan sangat penting untuk pemantauan lahan pertanian, perencanaan tata ruang, ketahanan pangan, dan konservasi lingkungan. Jawa Timur memiliki bentang alam yang beragam: lahan pertanian yang luas, kawasan terbangun perkotaan, hutan pegunungan, perairan darat dan laut, serta ekosistem <strong>mangrove</strong> di sepanjang pesisir.</p>
+<p>Interpretasi citra satelit secara manual memerlukan waktu dan tenaga yang besar serta rentan terhadap subjektivitas penafsir. Selain itu, wilayah yang luas membuat survei lapangan sulit dilakukan secara berkala. Pendekatan <em>machine learning</em> berbasis citra satelit multispektral dapat mengotomatiskan proses ini dan direplikasi setiap kali citra terbaru tersedia.</p>
+</section>
+<section id="tujuan-proyek">
+<h3>1.2. Tujuan Proyek<a class="headerlink" href="#tujuan-proyek" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Membangun model klasifikasi tutupan lahan Jawa Timur ke dalam <strong>5 kelas</strong>: Bangunan, Pertanian, Air, Hutan, dan Mangrove.</p></li>
+<li><p>Menerapkan algoritma <strong>Random Forest</strong> pada fitur tekstur spasial yang diturunkan dari citra Sentinel-2.</p></li>
+<li><p>Mengevaluasi model dengan <strong>validasi antar-wilayah</strong> agar hasilnya tidak terlalu optimistis akibat kebocoran data spasial.</p></li>
+<li><p>Menyajikan hasil klasifikasi dalam <strong>dashboard interaktif</strong> (peta satelit dengan filter kelas lahan dan grafik kinerja model) yang dapat diakses publik.</p></li>
+</ol>
+</section>
+<section id="ruang-lingkup-dan-batasan">
+<h3>1.3. Ruang Lingkup dan Batasan<a class="headerlink" href="#ruang-lingkup-dan-batasan" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Aspek</p></th>
+<th class="head"><p>Keterangan</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Wilayah</strong></p></td>
+<td><p>Lokasi sampel tersebar di berbagai wilayah Provinsi Jawa Timur</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Sumber citra</strong></p></td>
+<td><p>Sentinel-2 Level-2A (<em>Bottom-of-Atmosphere Reflectance</em>)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Jumlah kelas</strong></p></td>
+<td><p>5 kelas tutupan lahan</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Unit analisis</strong></p></td>
+<td><p>Poligon sampel (hasil agregasi dari piksel di dalamnya)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Algoritma</strong></p></td>
+<td><p>Random Forest</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Output</strong></p></td>
+<td><p>Model <code class="docutils literal notranslate"><span class="pre">.joblib</span></code> dan dashboard Streamlit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="data-understanding-pengumpulan-pemahaman-data">
+<h2>2. Data Understanding (Pengumpulan &amp; Pemahaman Data)<a class="headerlink" href="#data-understanding-pengumpulan-pemahaman-data" title="Link to this heading">#</a></h2>
+<section id="definisi-5-kelas-tutupan-lahan">
+<h3>2.1. Definisi 5 Kelas Tutupan Lahan<a class="headerlink" href="#definisi-5-kelas-tutupan-lahan" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>No</p></th>
+<th class="head"><p>Kelas</p></th>
+<th class="head"><p>Label</p></th>
+<th class="head"><p>Definisi Objek</p></th>
+<th class="head"><p>Karakteristik Spektral Utama</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p><strong>Bangunan</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Permukiman, gedung, jalan aspal/beton, dan fasilitas industri</p></td>
+<td><p>Pantulan tinggi pada SWIR (B11) dan Red (B04); NDBI tinggi; NDVI rendah</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p><strong>Pertanian</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Sawah dan lahan budidaya (termasuk fase genangan, tanam, dan bera)</p></td>
+<td><p>Berubah mengikuti fase tanam; NDVI sedang hingga tinggi saat fase hijau</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p><strong>Air</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+<td><p>Laut, danau, waduk, dan badan air lainnya</p></td>
+<td><p>Penyerapan kuat pada NIR dan SWIR; NDWI dan MNDWI positif; NDVI negatif</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><strong>Hutan</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p>Vegetasi berkanopi rapat di daratan, termasuk hutan pegunungan</p></td>
+<td><p>Pantulan NIR tinggi dan serapan Red kuat; NDVI tinggi</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p><strong>Mangrove</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
+<td><p>Hutan bakau di muara dan pantai berlumpur pasang surut</p></td>
+<td><p>Sinyal vegetasi hijau dengan pengaruh substrat basah (SWIR relatif lebih rendah)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="citra-sentinel-2-level-2a">
+<h3>2.2. Citra Sentinel-2 Level-2A<a class="headerlink" href="#citra-sentinel-2-level-2a" title="Link to this heading">#</a></h3>
+<p>Citra bersumber dari sensor <strong>Multispectral Instrument (MSI)</strong> pada satelit <strong>Sentinel-2</strong> dalam produk <strong>Level-2A</strong> (koreksi atmosfer <em>Bottom-of-Atmosphere</em>), diakses melalui platform <strong>openEO</strong> pada <em>Copernicus Data Space Ecosystem</em> (CDSE).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Band</p></th>
+<th class="head"><p>Nama</p></th>
+<th class="head"><p>Panjang Gelombang</p></th>
+<th class="head"><p>Resolusi</p></th>
+<th class="head"><p>Kegunaan</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>B02</strong></p></td>
+<td><p>Blue</p></td>
+<td><p>490 nm</p></td>
+<td><p>10 m</p></td>
+<td><p>Deteksi badan air dan hamburan atmosfer</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>B03</strong></p></td>
+<td><p>Green</p></td>
+<td><p>560 nm</p></td>
+<td><p>10 m</p></td>
+<td><p>Puncak pantulan klorofil dan sedimen perairan</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>B04</strong></p></td>
+<td><p>Red</p></td>
+<td><p>665 nm</p></td>
+<td><p>10 m</p></td>
+<td><p>Serapan klorofil; pembeda vegetasi dengan tanah dan bangunan</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>B08</strong></p></td>
+<td><p>Near Infrared (NIR)</p></td>
+<td><p>842 nm</p></td>
+<td><p>10 m</p></td>
+<td><p>Pantulan struktur daun; diserap hampir total oleh air</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>B11</strong></p></td>
+<td><p>Short-Wave Infrared (SWIR)</p></td>
+<td><p>1610 nm</p></td>
+<td><p>20 m</p></td>
+<td><p>Kelembapan tanah dan vegetasi serta material beton/atap</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="indeks-spektral">
+<h3>2.3. Indeks Spektral<a class="headerlink" href="#indeks-spektral" title="Link to this heading">#</a></h3>
+<p>Empat indeks spektral dihitung untuk memperkuat keterpisahan antar-kelas (konstanta <span class="math notranslate nohighlight">\(\epsilon\)</span> kecil mencegah pembagian dengan nol):</p>
+<p><strong>Normalized Difference Vegetation Index (NDVI)</strong>, mengukur kerapatan vegetasi hijau:</p>
+<div class="math notranslate nohighlight">
+\[\text{NDVI} = \frac{B08 - B04}{B08 + B04 + \epsilon}\]</div>
+<p><strong>Normalized Difference Water Index (NDWI)</strong>, mengisolasi badan air terbuka:</p>
+<div class="math notranslate nohighlight">
+\[\text{NDWI} = \frac{B03 - B08}{B03 + B08 + \epsilon}\]</div>
+<p><strong>Modified NDWI (MNDWI)</strong>, mendeteksi air dengan SWIR dan meredam gangguan area terbangun:</p>
+<div class="math notranslate nohighlight">
+\[\text{MNDWI} = \frac{B03 - B11}{B03 + B11 + \epsilon}\]</div>
+<p><strong>Normalized Difference Built-up Index (NDBI)</strong>, menonjolkan kawasan terbangun:</p>
+<div class="math notranslate nohighlight">
+\[\text{NDBI} = \frac{B11 - B08}{B11 + B08 + \epsilon}\]</div>
+</section>
+<section id="dataset-ground-truth">
+<h3>2.4. Dataset Ground Truth<a class="headerlink" href="#dataset-ground-truth" title="Link to this heading">#</a></h3>
+<p>Sampel <em>ground truth</em> berupa <strong>poligon yang didigitasi</strong> di atas citra satelit resolusi tinggi dan disimpan dalam format <strong>GeoJSON</strong> (EPSG:4326). Setiap poligon memiliki label kelas, dan sampel sengaja disebar di berbagai wilayah Jawa Timur agar model tidak hanya mengenali ciri satu lokasi.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kelas</p></th>
+<th class="head"><p>Jumlah Poligon</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
+<td><p>73</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
+<td><p>74</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Air</strong></p></td>
+<td><p>75</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
+<td><p>121</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
+<td><p>75</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Total</strong></p></td>
+<td><p><strong>418</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="akuisisi-citra-via-openeo">
+<h3>2.5. Akuisisi Citra via openEO<a class="headerlink" href="#akuisisi-citra-via-openeo" title="Link to this heading">#</a></h3>
+<p>Citra diunduh melalui openEO dengan koleksi <code class="docutils literal notranslate"><span class="pre">SENTINEL2_L2A</span></code>. Karena sampel tersebar luas, pengunduhan dilakukan <strong>per wilayah</strong> (satu <em>bounding box</em> untuk setiap kelompok poligon yang berdekatan) agar berkas tetap ringan dan tidak melampaui batas pemrosesan. Citra dikomposit dengan <strong>median temporal</strong> untuk meminimalkan pengaruh awan.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Nilai</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Koleksi</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SENTINEL2_L2A</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Periode citra</p></td>
+<td><p>1 September 2026 – 30 September 2026</p></td>
+</tr>
+<tr class="row-even"><td><p>Batas tutupan awan</p></td>
+<td><p>30 %</p></td>
+</tr>
+<tr class="row-odd"><td><p>Resolusi</p></td>
+<td><p>10 m</p></td>
+</tr>
+<tr class="row-even"><td><p>Format keluaran</p></td>
+<td><p>GeoTIFF (<code class="docutils literal notranslate"><span class="pre">.tif</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="data-preprocessing-pra-pemrosesan-data">
+<h2>3. Data Preprocessing (Pra-pemrosesan Data)<a class="headerlink" href="#data-preprocessing-pra-pemrosesan-data" title="Link to this heading">#</a></h2>
+<section id="ekstraksi-piksel-dari-poligon">
+<h3>3.1. Ekstraksi Piksel dari Poligon<a class="headerlink" href="#ekstraksi-piksel-dari-poligon" title="Link to this heading">#</a></h3>
+<p>Citra GeoTIFF dipotong menggunakan bentuk setiap poligon sampel (<code class="docutils literal notranslate"><span class="pre">rasterio.mask</span></code>), dan seluruh piksel di dalamnya diambil sebagai data. Piksel kosong (bernilai 0) dibuang. Proses ini menghasilkan <strong>3.402.010 piksel</strong> berlabel.</p>
+</section>
+<section id="kompresi-spasial-piksel-poligon">
+<h3>3.2. Kompresi Spasial (Piksel → Poligon)<a class="headerlink" href="#kompresi-spasial-piksel-poligon" title="Link to this heading">#</a></h3>
+<p>Piksel yang bertetangga dalam satu poligon memiliki nilai spektral yang sangat mirip (autokorelasi spasial). Jika piksel-piksel ini dipakai langsung dan dibagi acak, piksel dari poligon yang sama dapat masuk ke data latih dan data uji sekaligus sehingga akurasi menjadi terlalu optimistis. Karena itu seluruh piksel dalam satu poligon dipadatkan menjadi <strong>satu sampel</strong>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tahap</p></th>
+<th class="head"><p>Jumlah Data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Piksel hasil ekstraksi</p></td>
+<td><p><strong>3.402.010</strong> piksel</p></td>
+</tr>
+<tr class="row-odd"><td><p>Setelah kompresi spasial</p></td>
+<td><p><strong>418</strong> poligon</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Kompresi ini juga mencegah poligon berukuran besar mendominasi proses pelatihan.</p>
+</section>
+<section id="fitur-tekstur-spasial">
+<h3>3.3. Fitur Tekstur Spasial<a class="headerlink" href="#fitur-tekstur-spasial" title="Link to this heading">#</a></h3>
+<p>Setiap poligon dideskripsikan oleh <strong>18 fitur tekstur spasial</strong> yang diturunkan dari 5 band asli (B02, B03, B04, B08, B11) dan 4 indeks spektral (NDVI, NDWI, MNDWI, NDBI). Fitur tekstur menangkap tidak hanya nilai rata-rata, tetapi juga variasi nilai di dalam poligon, yang membedakan permukaan homogen (misalnya air) dari permukaan heterogen (misalnya permukiman).</p>
+<p>[ISI: sebutkan 18 fitur yang dipakai, misalnya statistik yang dihitung per band atau indeks]</p>
+</section>
+<section id="pengelompokan-wilayah-untuk-validasi">
+<h3>3.4. Pengelompokan Wilayah untuk Validasi<a class="headerlink" href="#pengelompokan-wilayah-untuk-validasi" title="Link to this heading">#</a></h3>
+<p>Poligon dikelompokkan menjadi <strong>wilayah</strong> menggunakan algoritma <strong>DBSCAN</strong> pada titik pusat poligon (dalam sistem koordinat meter). Poligon yang berdekatan masuk ke wilayah yang sama dan selalu berada pada fold yang sama saat validasi.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Nilai</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Algoritma</p></td>
+<td><p>DBSCAN</p></td>
+</tr>
+<tr class="row-odd"><td><p>Radius (<code class="docutils literal notranslate"><span class="pre">eps</span></code>)</p></td>
+<td><p>10.0 km</p></td>
+</tr>
+<tr class="row-even"><td><p>Jumlah wilayah</p></td>
+<td><p>27</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Radius dipilih secara struktural: cukup besar untuk memisahkan poligon yang bertetangga, tetapi tidak sampai menyatukan sebagian besar sampel menjadi satu wilayah.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="modeling-pemodelan-machine-learning">
+<h2>4. Modeling (Pemodelan Machine Learning)<a class="headerlink" href="#modeling-pemodelan-machine-learning" title="Link to this heading">#</a></h2>
+<section id="algoritma-random-forest">
+<h3>4.1. Algoritma Random Forest<a class="headerlink" href="#algoritma-random-forest" title="Link to this heading">#</a></h3>
+<p><strong>Random Forest</strong> adalah algoritma <em>ensemble</em> yang membangun banyak pohon keputusan dari subset data dan subset fitur yang berbeda, lalu menentukan kelas akhir melalui pemungutan suara mayoritas. Algoritma ini dipilih karena:</p>
+<ol class="arabic simple">
+<li><p><strong>Tidak memerlukan standardisasi fitur</strong>, sehingga band mentah dan indeks dapat dipakai bersama.</p></li>
+<li><p><strong>Tahan terhadap <em>outlier</em> dan <em>overfitting</em></strong> dibanding satu pohon keputusan, cocok untuk data berukuran menengah (418 poligon).</p></li>
+<li><p><strong>Menangani hubungan non-linear</strong> antar-fitur spektral dan tekstur.</p></li>
+<li><p><strong>Menyediakan <em>feature importance</em></strong> untuk menafsirkan fitur yang paling berperan.</p></li>
+</ol>
+</section>
+<section id="konfigurasi-model">
+<h3>4.2. Konfigurasi Model<a class="headerlink" href="#konfigurasi-model" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Hyperparameter</p></th>
+<th class="head"><p>Nilai</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_estimators</span></code></p></td>
+<td><p>200</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min_samples_leaf</span></code></p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">class_weight</span></code></p></td>
+<td><p>balanced</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p>42</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="ekspor-model">
+<h3>4.3. Ekspor Model<a class="headerlink" href="#ekspor-model" title="Link to this heading">#</a></h3>
+<p>Setelah evaluasi, model final dilatih ulang pada <strong>seluruh data poligon</strong> dan diekspor sebagai berkas biner <code class="docutils literal notranslate"><span class="pre">model_LULC_jatim_texture.joblib</span></code> agar dapat dimuat kembali oleh aplikasi Streamlit tanpa pelatihan ulang.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="evaluation-evaluasi-model-hasil-klasifikasi">
+<h2>5. Evaluation (Evaluasi Model &amp; Hasil Klasifikasi)<a class="headerlink" href="#evaluation-evaluasi-model-hasil-klasifikasi" title="Link to this heading">#</a></h2>
+<section id="skema-validasi-antar-wilayah">
+<h3>5.1. Skema Validasi Antar-Wilayah<a class="headerlink" href="#skema-validasi-antar-wilayah" title="Link to this heading">#</a></h3>
+<p>Evaluasi memakai <strong>validasi silang berbasis wilayah</strong>: seluruh poligon dari satu wilayah selalu berada pada fold yang sama, sehingga model diuji pada lokasi yang <strong>belum pernah dilihat</strong> saat pelatihan. Skema ini lebih ketat daripada pembagian acak karena autokorelasi spasial tidak lagi “bocor” dari data latih ke data uji.</p>
+</section>
+<section id="hasil-evaluasi">
+<h3>5.2. Hasil Evaluasi<a class="headerlink" href="#hasil-evaluasi" title="Link to this heading">#</a></h3>
+<p><strong>Akurasi Validasi Wilayah: 75,84%</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kelas</p></th>
+<th class="head"><p>F1-Score</p></th>
+<th class="head"><p>Kategori</p></th>
+<th class="head"><p>Keterangan</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
+<td><p>0,95</p></td>
+<td><p>Sangat baik</p></td>
+<td><p>Ciri spektral khas (SWIR tinggi, NDBI tinggi)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Air</strong></p></td>
+<td><p>0,88</p></td>
+<td><p>Sangat baik</p></td>
+<td><p>Penyerapan NIR dan SWIR membedakannya dari daratan</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
+<td><p>0,77</p></td>
+<td><p>Baik</p></td>
+<td><p>Dapat dipisahkan dari hutan daratan berkat sinyal kelembapan</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
+<td><p>0,74</p></td>
+<td><p>Baik</p></td>
+<td><p>Sebagian tertukar dengan vegetasi lain</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Pertanian</strong></p></td>
+<td><p>0,47</p></td>
+<td><p>Rendah</p></td>
+<td><p>Kelas terlemah; ciri berubah mengikuti fase tanam</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="confusion-matrix">
+<h3>5.3. Confusion Matrix<a class="headerlink" href="#confusion-matrix" title="Link to this heading">#</a></h3>
+<p>Matriks kekeliruan lengkap dan grafik Precision, Recall, serta F1-Score per kelas ditampilkan secara interaktif pada dashboard Streamlit.</p>
+</section>
+</section>
+<section id="id1">
+<h2>5.3. Confusion Matrix<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Aktual \ Prediksi</p></th>
+<th class="head text-center"><p>Bangunan</p></th>
+<th class="head text-center"><p>Pertanian</p></th>
+<th class="head text-center"><p>Air</p></th>
+<th class="head text-center"><p>Hutan</p></th>
+<th class="head text-center"><p>Mangrove</p></th>
+<th class="head text-center"><p>Total Aktual</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p><strong>Bangunan</strong></p></td>
+<td class="text-center"><p>71</p></td>
+<td class="text-center"><p>1</p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p>1</p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p><strong>73</strong></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><strong>Pertanian</strong></p></td>
+<td class="text-center"><p>4</p></td>
+<td class="text-center"><p>34</p></td>
+<td class="text-center"><p>5</p></td>
+<td class="text-center"><p>25</p></td>
+<td class="text-center"><p>6</p></td>
+<td class="text-center"><p><strong>74</strong></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><strong>Air</strong></p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p>8</p></td>
+<td class="text-center"><p>63</p></td>
+<td class="text-center"><p>4</p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p><strong>75</strong></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><strong>Hutan</strong></p></td>
+<td class="text-center"><p>2</p></td>
+<td class="text-center"><p>16</p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p>96</p></td>
+<td class="text-center"><p>7</p></td>
+<td class="text-center"><p><strong>121</strong></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><strong>Mangrove</strong></p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p>10</p></td>
+<td class="text-center"><p>0</p></td>
+<td class="text-center"><p>12</p></td>
+<td class="text-center"><p>53</p></td>
+<td class="text-center"><p><strong>75</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="analisis-hasil">
+<h3>5.4. Analisis Hasil<a class="headerlink" href="#analisis-hasil" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Bangunan dan Air</strong> memiliki kinerja tertinggi (F1 ≥ 0,88) karena memiliki ciri spektral yang sangat berbeda dari kelas lain.</p></li>
+<li><p><strong>Mangrove (0,77) dan Hutan (0,74)</strong> cukup baik. Fitur tekstur dan indeks kelembapan membantu memisahkan vegetasi pesisir dari hutan daratan.</p></li>
+<li><p><strong>Pertanian (0,47)</strong> adalah kelas terlemah. Diduga karena lahan pertanian melewati beberapa fase (genangan, tanam, hijau, panen) yang membuatnya mirip dengan kelas lain pada satu komposit waktu, terutama vegetasi. Dugaan ini perlu diuji dengan citra multi-waktu.</p></li>
+<li><p>Hasil dilaporkan dari <strong>validasi antar-wilayah</strong> sehingga cenderung lebih rendah dibanding evaluasi acak per piksel, tetapi lebih mencerminkan kinerja pada lokasi baru.</p></li>
+</ol>
+</section>
+<section id="riwayat-iterasi">
+<h3>5.5. Riwayat Iterasi<a class="headerlink" href="#riwayat-iterasi" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Iterasi</p></th>
+<th class="head"><p>Jumlah Poligon</p></th>
+<th class="head"><p>Fitur</p></th>
+<th class="head"><p>Hasil Validasi Wilayah</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Awal</strong></p></td>
+<td><p>366</p></td>
+<td><p>9 fitur spektral (rata-rata per poligon)</p></td>
+<td><p>64,92% (rata-rata per fold), 68% (gabungan)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Final</strong></p></td>
+<td><p>418</p></td>
+<td><p>18 fitur tekstur spasial</p></td>
+<td><p><strong>75,84%</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Pada iterasi awal, analisis per fold menunjukkan akurasi yang tidak stabil: satu fold hanya 31,6% karena hampir seluruh isinya poligon hutan, dan sampel hutan terkumpul di sedikit wilayah. Temuan ini menjadi dasar penambahan sampel dan pengayaan fitur pada iterasi final. Kedua hasil tidak sepenuhnya sebanding karena komposisi fold dan jumlah sampelnya berbeda.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="deployment-penyebaran-model-via-streamlit">
+<h2>6. Deployment (Penyebaran Model via Streamlit)<a class="headerlink" href="#deployment-penyebaran-model-via-streamlit" title="Link to this heading">#</a></h2>
+<section id="arsitektur-aplikasi">
+<h3>6.1. Arsitektur Aplikasi<a class="headerlink" href="#arsitektur-aplikasi" title="Link to this heading">#</a></h3>
+<p>Model dan hasil evaluasi dipublikasikan sebagai <strong><em>Single-Page Application</em> (SPA)</strong> interaktif berbasis <strong>Streamlit</strong>. Seluruh konten berada dalam satu halaman sehingga pengguna dapat melihat peta, filter, dan grafik tanpa berpindah halaman.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Komponen</p></th>
+<th class="head"><p>Keterangan</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Peta</strong></p></td>
+<td><p><strong>Folium</strong> (Leaflet) dengan basemap <em>Google Satellite</em> dan <em>OpenStreetMap</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Filter kelas</strong></p></td>
+<td><p>Filter native melalui <code class="docutils literal notranslate"><span class="pre">FeatureGroup</span></code>; tiap kelas lahan dapat dicentang atau dihapus centangnya</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Navigasi peta</strong></p></td>
+<td><p><em>Zoom</em> dan <em>pan</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Grafik</strong></p></td>
+<td><p><strong>Plotly</strong>: <em>Confusion Matrix</em> dan bar chart horizontal Precision, Recall, F1-Score</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Model</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model_LULC_jatim_texture.joblib</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="fitur-interaktif-peta">
+<h3>6.2. Fitur Interaktif Peta<a class="headerlink" href="#fitur-interaktif-peta" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Basemap satelit</strong> memungkinkan hasil klasifikasi dibandingkan langsung dengan kenampakan lahan sebenarnya.</p></li>
+<li><p><strong>Filter per kelas</strong> (misalnya hanya menampilkan Pertanian) memudahkan pengguna menelusuri satu jenis tutupan lahan.</p></li>
+<li><p><strong>Warna per kelas</strong> konsisten pada peta dan grafik sehingga mudah dibaca.</p></li>
+</ul>
+</section>
+<section id="akses-publik">
+<h3>6.3. Akses Publik<a class="headerlink" href="#akses-publik" title="Link to this heading">#</a></h3>
+<p>Aplikasi dapat diakses secara publik melalui tautan berikut:</p>
+<p>🌐 <strong><a class="reference external" href="https://dashboard-lulc-jatim.streamlit.app/">https://dashboard-lulc-jatim.streamlit.app/</a></strong></p>
+</section>
+</section>
+<section id="kesimpulan">
+<h2>7. Kesimpulan<a class="headerlink" href="#kesimpulan" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Hasil utama.</strong> Model Random Forest dengan 18 fitur tekstur spasial mencapai <strong>akurasi validasi wilayah 75,84%</strong> untuk 5 kelas tutupan lahan di Jawa Timur. Angka ini diperoleh dari pengujian pada lokasi yang belum pernah dilihat model.</p></li>
+<li><p><strong>Kinerja per kelas.</strong> Bangunan (F1 0,95) dan Air (F1 0,88) terklasifikasi sangat baik, Mangrove (0,77) dan Hutan (0,74) cukup baik, sedangkan <strong>Pertanian (0,47)</strong> masih menjadi kelas yang perlu ditingkatkan.</p></li>
+<li><p><strong>Pentingnya validasi spasial.</strong> Kompresi piksel menjadi poligon dan validasi antar-wilayah mencegah kebocoran data spasial. Analisis per fold juga terbukti membantu menemukan ketimpangan sebaran sampel.</p></li>
+<li><p><strong>Deployment.</strong> Hasil dipublikasikan dalam dashboard Streamlit interaktif yang memungkinkan pemantauan tutupan lahan secara visual oleh pengguna umum.</p></li>
+</ol>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./md"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="01_mulai-disini.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Mulai Menulis</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#instalasi-library-kebutuhan-lingkungan">Instalasi Library &amp; Kebutuhan Lingkungan</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#business-understanding-pemahaman-bisnis">1. Business Understanding (Pemahaman Bisnis)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#latar-belakang">1.1. Latar Belakang</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tujuan-proyek">1.2. Tujuan Proyek</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ruang-lingkup-dan-batasan">1.3. Ruang Lingkup dan Batasan</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-understanding-pengumpulan-pemahaman-data">2. Data Understanding (Pengumpulan &amp; Pemahaman Data)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#definisi-5-kelas-tutupan-lahan">2.1. Definisi 5 Kelas Tutupan Lahan</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#citra-sentinel-2-level-2a">2.2. Citra Sentinel-2 Level-2A</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#indeks-spektral">2.3. Indeks Spektral</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-ground-truth">2.4. Dataset Ground Truth</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akuisisi-citra-via-openeo">2.5. Akuisisi Citra via openEO</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-preprocessing-pra-pemrosesan-data">3. Data Preprocessing (Pra-pemrosesan Data)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ekstraksi-piksel-dari-poligon">3.1. Ekstraksi Piksel dari Poligon</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kompresi-spasial-piksel-poligon">3.2. Kompresi Spasial (Piksel → Poligon)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-tekstur-spasial">3.3. Fitur Tekstur Spasial</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pengelompokan-wilayah-untuk-validasi">3.4. Pengelompokan Wilayah untuk Validasi</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modeling-pemodelan-machine-learning">4. Modeling (Pemodelan Machine Learning)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#algoritma-random-forest">4.1. Algoritma Random Forest</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#konfigurasi-model">4.2. Konfigurasi Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ekspor-model">4.3. Ekspor Model</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-evaluasi-model-hasil-klasifikasi">5. Evaluation (Evaluasi Model &amp; Hasil Klasifikasi)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-validasi-antar-wilayah">5.1. Skema Validasi Antar-Wilayah</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-evaluasi">5.2. Hasil Evaluasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#confusion-matrix">5.3. Confusion Matrix</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">5.3. Confusion Matrix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-hasil">5.4. Analisis Hasil</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#riwayat-iterasi">5.5. Riwayat Iterasi</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-model-via-streamlit">6. Deployment (Penyebaran Model via Streamlit)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">6.1. Arsitektur Aplikasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">6.2. Fitur Interaktif Peta</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">6.3. Akses Publik</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fathulimann123
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
