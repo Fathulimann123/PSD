@@ -66,7 +66,7 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Mulai Menulis" href="01_mulai-disini.html" />
+    <link rel="prev" title="Business Understanding" href="00_pengantar-proyek.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -228,7 +228,6 @@
 
 
 
-<li class="toctree-l1"><a class="reference internal" href="01_mulai-disini.html">Mulai Menulis</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Klasifikasi Spasial Tutupan Lahan (LULC) Jawa Timur (Random Forest &amp; Sentinel-2)</a></li>
 </ul>
 
@@ -454,20 +453,29 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-validasi-antar-wilayah">5.1. Skema Validasi Antar-Wilayah</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-evaluasi">5.2. Hasil Evaluasi</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#confusion-matrix">5.3. Confusion Matrix</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">5.3. Confusion Matrix</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-hasil">5.4. Analisis Hasil</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#riwayat-iterasi">5.5. Riwayat Iterasi</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-model-via-streamlit">6. Deployment (Penyebaran Model via Streamlit)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">6.1. Arsitektur Aplikasi</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">6.2. Fitur Interaktif Peta</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">6.3. Akses Publik</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prediksi-tutupan-lahan-jawa-timur">6. Prediksi Tutupan Lahan Jawa Timur</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-prediksi-berbasis-sel">6.1. Skema Prediksi Berbasis Sel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tahapan-proses">6.2. Tahapan Proses</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-prediksi">6.3. Hasil Prediksi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keterbatasan-prediksi">6.4. Keterbatasan Prediksi</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-hasil-via-streamlit">7. Deployment (Penyebaran Hasil via Streamlit)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alur-dari-data-ke-dashboard">7.1. Alur dari Data ke Dashboard</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">7.2. Arsitektur Aplikasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">7.3. Fitur Interaktif Peta</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">7.4. Akses Publik</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">8. Kesimpulan</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keterbatasan">Keterbatasan</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#saran-pengembangan">Saran Pengembangan</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -700,19 +708,19 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <td><p>73</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
-<td><p>74</p></td>
+<td><p>143</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>Air</strong></p></td>
 <td><p>75</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
-<td><p>121</p></td>
+<td><p>124</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
 <td><p>75</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Total</strong></p></td>
-<td><p><strong>418</strong></p></td>
+<td><p><strong>490</strong></p></td>
 </tr>
 </tbody>
 </table>
@@ -735,7 +743,7 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <td><p>1 September 2026 – 30 September 2026</p></td>
 </tr>
 <tr class="row-even"><td><p>Batas tutupan awan</p></td>
-<td><p>30 %</p></td>
+<td><p>None</p></td>
 </tr>
 <tr class="row-odd"><td><p>Resolusi</p></td>
 <td><p>10 m</p></td>
@@ -753,7 +761,7 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <h2>3. Data Preprocessing (Pra-pemrosesan Data)<a class="headerlink" href="#data-preprocessing-pra-pemrosesan-data" title="Link to this heading">#</a></h2>
 <section id="ekstraksi-piksel-dari-poligon">
 <h3>3.1. Ekstraksi Piksel dari Poligon<a class="headerlink" href="#ekstraksi-piksel-dari-poligon" title="Link to this heading">#</a></h3>
-<p>Citra GeoTIFF dipotong menggunakan bentuk setiap poligon sampel (<code class="docutils literal notranslate"><span class="pre">rasterio.mask</span></code>), dan seluruh piksel di dalamnya diambil sebagai data. Piksel kosong (bernilai 0) dibuang. Proses ini menghasilkan <strong>3.402.010 piksel</strong> berlabel.</p>
+<p>Citra GeoTIFF dipotong menggunakan bentuk setiap poligon sampel (<code class="docutils literal notranslate"><span class="pre">rasterio.mask</span></code>), dan seluruh piksel di dalamnya diambil sebagai data. Piksel kosong (bernilai 0) dibuang. Proses ini menghasilkan <strong>3.409.327 piksel</strong> berlabel.</p>
 </section>
 <section id="kompresi-spasial-piksel-poligon">
 <h3>3.2. Kompresi Spasial (Piksel → Poligon)<a class="headerlink" href="#kompresi-spasial-piksel-poligon" title="Link to this heading">#</a></h3>
@@ -766,10 +774,10 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Piksel hasil ekstraksi</p></td>
-<td><p><strong>3.402.010</strong> piksel</p></td>
+<td><p><strong>3.409.327</strong> piksel</p></td>
 </tr>
 <tr class="row-odd"><td><p>Setelah kompresi spasial</p></td>
-<td><p><strong>418</strong> poligon</p></td>
+<td><p><strong>490</strong> poligon</p></td>
 </tr>
 </tbody>
 </table>
@@ -778,8 +786,55 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 </section>
 <section id="fitur-tekstur-spasial">
 <h3>3.3. Fitur Tekstur Spasial<a class="headerlink" href="#fitur-tekstur-spasial" title="Link to this heading">#</a></h3>
-<p>Setiap poligon dideskripsikan oleh <strong>18 fitur tekstur spasial</strong> yang diturunkan dari 5 band asli (B02, B03, B04, B08, B11) dan 4 indeks spektral (NDVI, NDWI, MNDWI, NDBI). Fitur tekstur menangkap tidak hanya nilai rata-rata, tetapi juga variasi nilai di dalam poligon, yang membedakan permukaan homogen (misalnya air) dari permukaan heterogen (misalnya permukiman).</p>
-<p>[ISI: sebutkan 18 fitur yang dipakai, misalnya statistik yang dihitung per band atau indeks]</p>
+<p>Setiap poligon dideskripsikan oleh 18 fitur, yaitu rata-rata (_mean) dan simpangan baku (_std) dari sembilan lapisan: b02, b03, b04, b08, b11, ndvi, ndwi, mndwi, dan ndbi, yang dihitung dari seluruh piksel di dalam poligon. Rata-rata menangkap nilai khas objek, sedangkan simpangan baku menangkap keragaman (tekstur) di dalamnya, sehingga 9 lapisan menghasilkan <strong>18 fitur</strong>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Lapisan</p></th>
+<th class="head"><p>Fitur rata-rata</p></th>
+<th class="head"><p>Fitur simpangan baku</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>B02 (Blue)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b02_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b02_std</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>B03 (Green)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b03_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b03_std</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>B04 (Red)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b04_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b04_std</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>B08 (NIR)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b08_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b08_std</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>B11 (SWIR)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b11_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">b11_std</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>NDVI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndvi_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndvi_std</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>NDWI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndwi_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndwi_std</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>MNDWI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mndwi_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mndwi_std</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>NDBI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndbi_mean</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ndbi_std</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Rata-rata menangkap nilai khas suatu objek, sedangkan simpangan baku menangkap keragamannya (tekstur). Misalnya air relatif seragam (simpangan baku kecil), sedangkan permukiman bercampur atap, jalan, dan pohon (simpangan baku besar). Poligon yang hanya berisi satu piksel diberi simpangan baku 0.</p>
 </section>
 <section id="pengelompokan-wilayah-untuk-validasi">
 <h3>3.4. Pengelompokan Wilayah untuk Validasi<a class="headerlink" href="#pengelompokan-wilayah-untuk-validasi" title="Link to this heading">#</a></h3>
@@ -798,7 +853,7 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <td><p>10.0 km</p></td>
 </tr>
 <tr class="row-even"><td><p>Jumlah wilayah</p></td>
-<td><p>27</p></td>
+<td><p>29</p></td>
 </tr>
 </tbody>
 </table>
@@ -858,10 +913,12 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 </section>
 <section id="hasil-evaluasi">
 <h3>5.2. Hasil Evaluasi<a class="headerlink" href="#hasil-evaluasi" title="Link to this heading">#</a></h3>
-<p><strong>Akurasi Validasi Wilayah: 75,84%</strong></p>
+<p><strong>Akurasi Validasi Wilayah: 73,67%</strong> (<code class="docutils literal notranslate"><span class="pre">GroupKFold</span></code> 5-fold berbasis wilayah, 490 poligon dari 29 wilayah)</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Kelas</p></th>
+<th class="head"><p>Precision</p></th>
+<th class="head"><p>Recall</p></th>
 <th class="head"><p>F1-Score</p></th>
 <th class="head"><p>Kategori</p></th>
 <th class="head"><p>Keterangan</p></th>
@@ -869,102 +926,111 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 </thead>
 <tbody>
 <tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
-<td><p>0,95</p></td>
+<td><p>0,92</p></td>
+<td><p>0,89</p></td>
+<td><p>0,90</p></td>
 <td><p>Sangat baik</p></td>
 <td><p>Ciri spektral khas (SWIR tinggi, NDBI tinggi)</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Air</strong></p></td>
-<td><p>0,88</p></td>
+<td><p>0,91</p></td>
+<td><p>0,83</p></td>
+<td><p>0,87</p></td>
 <td><p>Sangat baik</p></td>
 <td><p>Penyerapan NIR dan SWIR membedakannya dari daratan</p></td>
 </tr>
+<tr class="row-even"><td><p><strong>Hutan</strong></p></td>
+<td><p>0,70</p></td>
+<td><p>0,76</p></td>
+<td><p>0,73</p></td>
+<td><p>Baik</p></td>
+<td><p>Saling tertukar dengan Pertanian</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
+<td><p>0,60</p></td>
+<td><p>0,72</p></td>
+<td><p>0,66</p></td>
+<td><p>Sedang</p></td>
+<td><p>Membaik setelah sampel bertambah, tetapi masih tertukar dengan Hutan</p></td>
+</tr>
 <tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
-<td><p>0,77</p></td>
-<td><p>Baik</p></td>
-<td><p>Dapat dipisahkan dari hutan daratan berkat sinyal kelembapan</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
-<td><p>0,74</p></td>
-<td><p>Baik</p></td>
-<td><p>Sebagian tertukar dengan vegetasi lain</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Pertanian</strong></p></td>
-<td><p>0,47</p></td>
-<td><p>Rendah</p></td>
-<td><p>Kelas terlemah; ciri berubah mengikuti fase tanam</p></td>
+<td><p>0,82</p></td>
+<td><p>0,49</p></td>
+<td><p>0,62</p></td>
+<td><p>Sedang</p></td>
+<td><p>Precision tinggi, tetapi separuh poligon mangrove tidak terdeteksi</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Kategori F1: ≥ 0,85 sangat baik, 0,70-0,84 baik, 0,55-0,69 sedang, &lt; 0,55 rendah.</p>
 </section>
 <section id="confusion-matrix">
 <h3>5.3. Confusion Matrix<a class="headerlink" href="#confusion-matrix" title="Link to this heading">#</a></h3>
-<p>Matriks kekeliruan lengkap dan grafik Precision, Recall, serta F1-Score per kelas ditampilkan secara interaktif pada dashboard Streamlit.</p>
-</section>
-</section>
-<section id="id1">
-<h2>5.3. Confusion Matrix<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head text-left"><p>Aktual \ Prediksi</p></th>
-<th class="head text-center"><p>Bangunan</p></th>
-<th class="head text-center"><p>Pertanian</p></th>
-<th class="head text-center"><p>Air</p></th>
-<th class="head text-center"><p>Hutan</p></th>
-<th class="head text-center"><p>Mangrove</p></th>
-<th class="head text-center"><p>Total Aktual</p></th>
+<tr class="row-odd"><th class="head"><p>Aktual \ Prediksi</p></th>
+<th class="head"><p>Bangunan</p></th>
+<th class="head"><p>Pertanian</p></th>
+<th class="head"><p>Air</p></th>
+<th class="head"><p>Hutan</p></th>
+<th class="head"><p>Mangrove</p></th>
+<th class="head"><p>Total Aktual</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td class="text-left"><p><strong>Bangunan</strong></p></td>
-<td class="text-center"><p>71</p></td>
-<td class="text-center"><p>1</p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p>1</p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p><strong>73</strong></p></td>
+<tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
+<td><p>65</p></td>
+<td><p>7</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p><strong>73</strong></p></td>
 </tr>
-<tr class="row-odd"><td class="text-left"><p><strong>Pertanian</strong></p></td>
-<td class="text-center"><p>4</p></td>
-<td class="text-center"><p>34</p></td>
-<td class="text-center"><p>5</p></td>
-<td class="text-center"><p>25</p></td>
-<td class="text-center"><p>6</p></td>
-<td class="text-center"><p><strong>74</strong></p></td>
+<tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
+<td><p>6</p></td>
+<td><p>103</p></td>
+<td><p>6</p></td>
+<td><p>25</p></td>
+<td><p>3</p></td>
+<td><p><strong>143</strong></p></td>
 </tr>
-<tr class="row-even"><td class="text-left"><p><strong>Air</strong></p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p>8</p></td>
-<td class="text-center"><p>63</p></td>
-<td class="text-center"><p>4</p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p><strong>75</strong></p></td>
+<tr class="row-even"><td><p><strong>Air</strong></p></td>
+<td><p>0</p></td>
+<td><p>10</p></td>
+<td><p>62</p></td>
+<td><p>3</p></td>
+<td><p>0</p></td>
+<td><p><strong>75</strong></p></td>
 </tr>
-<tr class="row-odd"><td class="text-left"><p><strong>Hutan</strong></p></td>
-<td class="text-center"><p>2</p></td>
-<td class="text-center"><p>16</p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p>96</p></td>
-<td class="text-center"><p>7</p></td>
-<td class="text-center"><p><strong>121</strong></p></td>
+<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
+<td><p>0</p></td>
+<td><p>25</p></td>
+<td><p>0</p></td>
+<td><p>94</p></td>
+<td><p>5</p></td>
+<td><p><strong>124</strong></p></td>
 </tr>
-<tr class="row-even"><td class="text-left"><p><strong>Mangrove</strong></p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p>10</p></td>
-<td class="text-center"><p>0</p></td>
-<td class="text-center"><p>12</p></td>
-<td class="text-center"><p>53</p></td>
-<td class="text-center"><p><strong>75</strong></p></td>
+<tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
+<td><p>0</p></td>
+<td><p>26</p></td>
+<td><p>0</p></td>
+<td><p>12</p></td>
+<td><p>37</p></td>
+<td><p><strong>75</strong></p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Matriks yang sama ditampilkan secara interaktif pada dashboard Streamlit.</p>
+</section>
 <section id="analisis-hasil">
 <h3>5.4. Analisis Hasil<a class="headerlink" href="#analisis-hasil" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
-<li><p><strong>Bangunan dan Air</strong> memiliki kinerja tertinggi (F1 ≥ 0,88) karena memiliki ciri spektral yang sangat berbeda dari kelas lain.</p></li>
-<li><p><strong>Mangrove (0,77) dan Hutan (0,74)</strong> cukup baik. Fitur tekstur dan indeks kelembapan membantu memisahkan vegetasi pesisir dari hutan daratan.</p></li>
-<li><p><strong>Pertanian (0,47)</strong> adalah kelas terlemah. Diduga karena lahan pertanian melewati beberapa fase (genangan, tanam, hijau, panen) yang membuatnya mirip dengan kelas lain pada satu komposit waktu, terutama vegetasi. Dugaan ini perlu diuji dengan citra multi-waktu.</p></li>
+<li><p><strong>Bangunan dan Air</strong> memiliki kinerja tertinggi (F1 ≥ 0,87) karena memiliki ciri spektral yang sangat berbeda dari kelas lain.</p></li>
+<li><p><strong>Pertanian dan Hutan</strong> paling sering tertukar: 25 poligon Pertanian diprediksi Hutan dan 25 poligon Hutan diprediksi Pertanian. Keduanya sama-sama vegetasi hijau sehingga ciri spektralnya berdekatan pada satu komposit waktu. Dugaan ini perlu diuji dengan citra multi-waktu.</p></li>
+<li><p><strong>Pertanian (F1 0,66)</strong> membaik dibanding iterasi sebelumnya (0,47) setelah jumlah sampelnya bertambah dari 74 menjadi 143 poligon dengan variasi kondisi lahan (genangan, bera, hijau, dan tegalan).</p></li>
+<li><p><strong>Mangrove (F1 0,62, recall 0,49)</strong> adalah kelas yang paling menurun. Sebanyak 26 poligon mangrove diprediksi Pertanian dan 12 diprediksi Hutan. Penyebab yang paling mungkin adalah <strong>sebaran sampel</strong>: 54 dari 75 poligon mangrove berada di satu wilayah (Surabaya-Sidoarjo). Ketika wilayah itu menjadi data uji, model hanya belajar dari 21 poligon mangrove lain dan 36 dari 54 poligon tersebut salah diprediksi. Pada dua wilayah mangrove lainnya, 19 dari 21 poligon (sekitar 90%) diprediksi benar. Jadi F1 mangrove bersifat pesimistis untuk Surabaya-Sidoarjo dan belum menggambarkan kinerja pada pesisir lain.</p></li>
 <li><p>Hasil dilaporkan dari <strong>validasi antar-wilayah</strong> sehingga cenderung lebih rendah dibanding evaluasi acak per piksel, tetapi lebih mencerminkan kinerja pada lokasi baru.</p></li>
 </ol>
 </section>
@@ -984,23 +1050,155 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <td><p>9 fitur spektral (rata-rata per poligon)</p></td>
 <td><p>64,92% (rata-rata per fold), 68% (gabungan)</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Final</strong></p></td>
+<tr class="row-odd"><td><p><strong>Iterasi 2</strong></p></td>
 <td><p>418</p></td>
 <td><p>18 fitur tekstur spasial</p></td>
-<td><p><strong>75,84%</strong></p></td>
+<td><p>75,84%</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Iterasi 3 (Final)</strong></p></td>
+<td><p>490</p></td>
+<td><p>18 fitur tekstur spasial</p></td>
+<td><p><strong>73,67%</strong></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Pada iterasi awal, analisis per fold menunjukkan akurasi yang tidak stabil: satu fold hanya 31,6% karena hampir seluruh isinya poligon hutan, dan sampel hutan terkumpul di sedikit wilayah. Temuan ini menjadi dasar penambahan sampel dan pengayaan fitur pada iterasi final. Kedua hasil tidak sepenuhnya sebanding karena komposisi fold dan jumlah sampelnya berbeda.</p>
+<ul class="simple">
+<li><p><strong>Awal:</strong> akurasi tidak stabil. Satu fold hanya 31,6% karena hampir seluruh isinya poligon hutan, dan sampel hutan terkumpul di sedikit wilayah.</p></li>
+<li><p><strong>Iterasi 2:</strong> sampel hutan ditambah (69 menjadi 121 poligon) dan fitur diperkaya dengan simpangan baku.</p></li>
+<li><p><strong>Iterasi 3:</strong> ditambah 72 poligon (Pertanian 74 menjadi 143 dan Hutan 121 menjadi 124) untuk memperkaya variasi kelas yang paling lemah. Pertanian membaik (F1 0,47 menjadi 0,66), sedangkan Mangrove menurun (0,77 menjadi 0,62) akibat sebaran sampel yang terpusat di satu wilayah (poin 4 pada 5.4).</p></li>
+</ul>
+<p>Ketiga hasil tidak sepenuhnya sebanding karena jumlah sampel dan komposisi fold berbeda pada tiap iterasi. Iterasi 3 dipilih sebagai model final karena memiliki sampel terbanyak dan cakupan variasi kelas yang lebih luas, walaupun akurasi totalnya sedikit di bawah iterasi 2.</p>
 </section>
 </section>
-<hr class="docutils" />
-<section id="deployment-penyebaran-model-via-streamlit">
-<h2>6. Deployment (Penyebaran Model via Streamlit)<a class="headerlink" href="#deployment-penyebaran-model-via-streamlit" title="Link to this heading">#</a></h2>
+<section id="prediksi-tutupan-lahan-jawa-timur">
+<h2>6. Prediksi Tutupan Lahan Jawa Timur<a class="headerlink" href="#prediksi-tutupan-lahan-jawa-timur" title="Link to this heading">#</a></h2>
+<p>Setelah model divalidasi, model diterapkan ke seluruh Provinsi Jawa Timur untuk menghasilkan peta tutupan lahan beserta luas tiap kelas.</p>
+<section id="skema-prediksi-berbasis-sel">
+<h3>6.1. Skema Prediksi Berbasis Sel<a class="headerlink" href="#skema-prediksi-berbasis-sel" title="Link to this heading">#</a></h3>
+<p>Model dilatih pada statistik per poligon (rata-rata dan simpangan baku), sehingga citra tidak dapat diprediksi piksel demi piksel. Citra dibagi menjadi <strong>sel 100 × 100 m</strong> (10 × 10 piksel Sentinel-2), dan fitur setiap sel dihitung dengan cara yang sama seperti saat pelatihan. Ukuran 100 m dipilih sebagai kompromi antara jumlah piksel yang cukup untuk menghitung simpangan baku dan detail spasial peta.</p>
+</section>
+<section id="tahapan-proses">
+<h3>6.2. Tahapan Proses<a class="headerlink" href="#tahapan-proses" title="Link to this heading">#</a></h3>
+<p>Seluruh Jawa Timur (sekitar 478 juta piksel pada resolusi 10 m) terlalu besar untuk diproses sekaligus, sehingga wilayah dipecah menjadi kotak-kotak dan perhitungan fitur dilakukan langsung di server openEO.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tahap</p></th>
+<th class="head"><p>Proses</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Membaca batas wilayah Jawa Timur (GeoJSON) yang sudah diberi margin pesisir agar perairan dekat pantai ikut terpetakan</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Memotong area menjadi <strong>126 kotak berukuran 30 × 30 km</strong>; kotak yang berada di luar area dibuang</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Per kotak, openEO menghitung indeks (NDVI, NDWI, MNDWI, NDBI) pada setiap piksel, lalu merata-ratakannya ke sel 100 m (<code class="docutils literal notranslate"><span class="pre">resample_spatial</span></code>, metode <em>average</em>) untuk 9 lapisan beserta kuadratnya</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Menurunkan simpangan baku dari rata-rata dan rata-rata kuadrat, lalu menyusun 18 fitur dengan urutan identik dengan pelatihan</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Memprediksi kelas setiap sel dengan model; sel tanpa data diberi nilai kosong</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>Menggabungkan seluruh kotak menjadi satu peta (<code class="docutils literal notranslate"><span class="pre">rasterio.merge</span></code>), memotongnya sesuai batas wilayah, dan menyimpannya sebagai <code class="docutils literal notranslate"><span class="pre">prediksi_jatim_100m.tif</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Menghitung luas tiap kelas (1 sel = 100 × 100 m = 1 hektare)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Parameter citra <strong>sama dengan saat pelatihan</strong>: koleksi <code class="docutils literal notranslate"><span class="pre">SENTINEL2_L2A</span></code>, lima band (B02, B03, B04, B08, B11), median temporal 1-30 September 2026, tanpa filter awan.</p>
+<p>Simpangan baku sel dihitung dari rata-rata (<span class="math notranslate nohighlight">\(\bar{x}\)</span>) dan rata-rata kuadrat (<span class="math notranslate nohighlight">\(\overline{x^2}\)</span>) dengan <span class="math notranslate nohighlight">\(n = 100\)</span> piksel per sel:</p>
+<div class="math notranslate nohighlight">
+\[\sigma = \sqrt{\frac{n}{n-1}\left(\overline{x^2} - \bar{x}^2\right)}\]</div>
+</section>
+<section id="hasil-prediksi">
+<h3>6.3. Hasil Prediksi<a class="headerlink" href="#hasil-prediksi" title="Link to this heading">#</a></h3>
+<p><img alt="Peta Prediksi Tutupan Lahan Jawa Timur" src="../_images/peta_prediksi_jatim.png" /></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kelas</p></th>
+<th class="head"><p>Luas (ha)</p></th>
+<th class="head"><p>Persen (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
+<td><p>300.679</p></td>
+<td><p>4,8</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
+<td><p>2.926.022</p></td>
+<td><p>46,5</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Air</strong></p></td>
+<td><p>1.536.676</p></td>
+<td><p>24,4</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
+<td><p>1.485.433</p></td>
+<td><p>23,6</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
+<td><p>41.631</p></td>
+<td><p>0,7</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Total</strong></p></td>
+<td><p><strong>6.290.441</strong></p></td>
+<td><p><strong>100</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Luas total area terpetakan adalah 6.290.441 hektare (sekitar 62.904 km²), termasuk margin perairan pesisir. Persentase dihitung terhadap total area tersebut, sehingga kelas Air (24,4%) sudah mencakup laut pada margin pesisir. Sel tanpa data di dalam batas wilayah sebesar 0,00%.</p>
+<p>Pertanian merupakan kelas terluas (46,5%), diikuti Air (24,4%) dan Hutan (23,6%), sedangkan Bangunan (4,8%) dan Mangrove (0,7%) menempati area yang jauh lebih kecil. Luas tiap kelas dihitung dari jumlah sel hasil prediksi (1 sel = 100 × 100 m = 1 hektare), sehingga merupakan <strong>perkiraan</strong> yang mengikuti akurasi model (73,67% pada validasi lintas wilayah), bukan hasil pengukuran langsung.</p>
+</section>
+<section id="keterbatasan-prediksi">
+<h3>6.4. Keterbatasan Prediksi<a class="headerlink" href="#keterbatasan-prediksi" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Sel campuran.</strong> Satu sel 100 × 100 m hanya dapat diberi satu label, padahal sel di perbatasan dua jenis lahan (misalnya mangrove dengan sawah, atau permukiman padat bervegetasi) berisi campuran. Pengamatan visual pada peta menunjukkan sebagian sel semacam ini diberi label Pertanian.</p></li>
+<li><p><strong>Tanpa acuan penuh.</strong> Tidak ada data acuan untuk seluruh wilayah, sehingga akurasi peta diperkirakan mengikuti hasil validasi lintas wilayah (73,67%) dan dapat lebih rendah pada wilayah dengan campuran lahan yang padat.</p></li>
+<li><p><strong>Hanya 5 kelas.</strong> Objek lain (misalnya tambak, lahan terbuka, atau area yang tertutup awan) tetap dipaksa masuk ke salah satu dari lima kelas.</p></li>
+<li><p><strong>Satu komposit waktu.</strong> Komposit median September (musim kemarau) tanpa filter awan belum menangkap perubahan fase tanam.</p></li>
+</ul>
+</section>
+</section>
+<section id="deployment-penyebaran-hasil-via-streamlit">
+<h2>7. Deployment (Penyebaran Hasil via Streamlit)<a class="headerlink" href="#deployment-penyebaran-hasil-via-streamlit" title="Link to this heading">#</a></h2>
+<section id="alur-dari-data-ke-dashboard">
+<h3>7.1. Alur dari Data ke Dashboard<a class="headerlink" href="#alur-dari-data-ke-dashboard" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tahap</p></th>
+<th class="head"><p>Proses</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Ambil</strong></p></td>
+<td><p>Citra Sentinel-2 diambil dari Copernicus Data Space melalui openEO</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Proses</strong></p></td>
+<td><p>Indeks dan 18 fitur (rata-rata dan simpangan baku) dihitung per sel 100 m</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Klasifikasi</strong></p></td>
+<td><p>Model Random Forest memprediksi kelas tiap sel, lalu hasilnya digabung menjadi satu peta</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Informasi</strong></p></td>
+<td><p>Peta, luas tiap kelas, dan metrik evaluasi ditampilkan pada dashboard</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Tahap ambil, proses, dan klasifikasi dijalankan di Google Colab. Hasilnya diekspor menjadi berkas ringan, sehingga dashboard hanya perlu menampilkan tanpa menghitung ulang.</p>
+</section>
 <section id="arsitektur-aplikasi">
-<h3>6.1. Arsitektur Aplikasi<a class="headerlink" href="#arsitektur-aplikasi" title="Link to this heading">#</a></h3>
-<p>Model dan hasil evaluasi dipublikasikan sebagai <strong><em>Single-Page Application</em> (SPA)</strong> interaktif berbasis <strong>Streamlit</strong>. Seluruh konten berada dalam satu halaman sehingga pengguna dapat melihat peta, filter, dan grafik tanpa berpindah halaman.</p>
+<h3>7.2. Arsitektur Aplikasi<a class="headerlink" href="#arsitektur-aplikasi" title="Link to this heading">#</a></h3>
+<p>Hasil dipublikasikan sebagai <strong><em>Single-Page Application</em> (SPA)</strong> interaktif berbasis <strong>Streamlit</strong>. Seluruh konten berada dalam satu halaman sehingga pengguna dapat melihat peta, luas, filter, dan grafik tanpa berpindah halaman.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Komponen</p></th>
@@ -1011,44 +1209,98 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <tr class="row-even"><td><p><strong>Peta</strong></p></td>
 <td><p><strong>Folium</strong> (Leaflet) dengan basemap <em>Google Satellite</em> dan <em>OpenStreetMap</em></p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Filter kelas</strong></p></td>
-<td><p>Filter native melalui <code class="docutils literal notranslate"><span class="pre">FeatureGroup</span></code>; tiap kelas lahan dapat dicentang atau dihapus centangnya</p></td>
+<tr class="row-odd"><td><p><strong>Hasil prediksi</strong></p></td>
+<td><p>Lima gambar PNG transparan (satu per kelas) yang ditumpuk di atas citra satelit</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Navigasi peta</strong></p></td>
-<td><p><em>Zoom</em> dan <em>pan</em></p></td>
+<tr class="row-even"><td><p><strong>Layer sampel</strong></p></td>
+<td><p>Poligon sampel hasil digitasi sebagai layer tambahan (awalnya tidak dicentang)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Filter kelas</strong></p></td>
+<td><p>Filter native melalui <code class="docutils literal notranslate"><span class="pre">FeatureGroup</span></code>; tiap kelas dapat dicentang atau dihapus centangnya, misalnya hanya menampilkan Pertanian</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Informasi luas</strong></p></td>
+<td><p>Kartu luas (hektare dan persen) untuk tiap kelas</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Grafik</strong></p></td>
 <td><p><strong>Plotly</strong>: <em>Confusion Matrix</em> dan bar chart horizontal Precision, Recall, F1-Score</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Model</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">model_LULC_jatim_texture.joblib</span></code></p></td>
+<tr class="row-even"><td><p><strong>Sumber data</strong></p></td>
+<td><p>Folder <code class="docutils literal notranslate"><span class="pre">data/</span></code>: lima PNG, <code class="docutils literal notranslate"><span class="pre">peta_meta.json</span></code>, <code class="docutils literal notranslate"><span class="pre">metrik.json</span></code>, dan <code class="docutils literal notranslate"><span class="pre">luas_per_kelas.csv</span></code> (model tidak dimuat di dashboard)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
 <section id="fitur-interaktif-peta">
-<h3>6.2. Fitur Interaktif Peta<a class="headerlink" href="#fitur-interaktif-peta" title="Link to this heading">#</a></h3>
+<h3>7.3. Fitur Interaktif Peta<a class="headerlink" href="#fitur-interaktif-peta" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>Basemap satelit</strong> memungkinkan hasil klasifikasi dibandingkan langsung dengan kenampakan lahan sebenarnya.</p></li>
-<li><p><strong>Filter per kelas</strong> (misalnya hanya menampilkan Pertanian) memudahkan pengguna menelusuri satu jenis tutupan lahan.</p></li>
-<li><p><strong>Warna per kelas</strong> konsisten pada peta dan grafik sehingga mudah dibaca.</p></li>
+<li><p><strong>Filter per kelas</strong> memudahkan pengguna menelusuri satu jenis tutupan lahan.</p></li>
+<li><p><strong>Warna per kelas</strong> diambil dari satu sumber yang sama sehingga konsisten pada peta, legenda, dan grafik.</p></li>
+<li><p><strong>Metrik dibaca dari berkas hasil evaluasi</strong>, sehingga angka pada dashboard selalu sama dengan hasil model.</p></li>
 </ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kelas</p></th>
+<th class="head"><p>Warna</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Bangunan</strong></p></td>
+<td><p>Merah</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Pertanian</strong></p></td>
+<td><p>Kuning</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Air</strong></p></td>
+<td><p>Biru</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hutan</strong></p></td>
+<td><p>Hijau tua</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mangrove</strong></p></td>
+<td><p>Tosca</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="akses-publik">
-<h3>6.3. Akses Publik<a class="headerlink" href="#akses-publik" title="Link to this heading">#</a></h3>
+<h3>7.4. Akses Publik<a class="headerlink" href="#akses-publik" title="Link to this heading">#</a></h3>
 <p>Aplikasi dapat diakses secara publik melalui tautan berikut:</p>
 <p>🌐 <strong><a class="reference external" href="https://dashboard-lulc-jatim.streamlit.app/">https://dashboard-lulc-jatim.streamlit.app/</a></strong></p>
 </section>
 </section>
+<hr class="docutils" />
 <section id="kesimpulan">
-<h2>7. Kesimpulan<a class="headerlink" href="#kesimpulan" title="Link to this heading">#</a></h2>
+<h2>8. Kesimpulan<a class="headerlink" href="#kesimpulan" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p><strong>Hasil utama.</strong> Model Random Forest dengan 18 fitur tekstur spasial mencapai <strong>akurasi validasi wilayah 75,84%</strong> untuk 5 kelas tutupan lahan di Jawa Timur. Angka ini diperoleh dari pengujian pada lokasi yang belum pernah dilihat model.</p></li>
-<li><p><strong>Kinerja per kelas.</strong> Bangunan (F1 0,95) dan Air (F1 0,88) terklasifikasi sangat baik, Mangrove (0,77) dan Hutan (0,74) cukup baik, sedangkan <strong>Pertanian (0,47)</strong> masih menjadi kelas yang perlu ditingkatkan.</p></li>
-<li><p><strong>Pentingnya validasi spasial.</strong> Kompresi piksel menjadi poligon dan validasi antar-wilayah mencegah kebocoran data spasial. Analisis per fold juga terbukti membantu menemukan ketimpangan sebaran sampel.</p></li>
-<li><p><strong>Deployment.</strong> Hasil dipublikasikan dalam dashboard Streamlit interaktif yang memungkinkan pemantauan tutupan lahan secara visual oleh pengguna umum.</p></li>
+<li><p><strong>Hasil utama.</strong> Model Random Forest dengan 18 fitur tekstur spasial mencapai <strong>akurasi validasi wilayah 73,67%</strong> untuk 5 kelas tutupan lahan di Jawa Timur (490 poligon dari 29 wilayah). Angka ini diperoleh dari pengujian pada lokasi yang belum pernah dilihat model.</p></li>
+<li><p><strong>Kinerja per kelas.</strong> Bangunan (F1 0,90) dan Air (0,87) terklasifikasi sangat baik, Hutan (0,73) baik, <strong>Pertanian (0,66)</strong> membaik dibanding iterasi sebelumnya (0,47), sedangkan <strong>Mangrove (0,62, recall 0,49)</strong> masih perlu ditingkatkan karena sampelnya terpusat pada sedikit wilayah.</p></li>
+<li><p><strong>Peta seluruh Jawa Timur.</strong> Model berhasil diterapkan pada 126 kotak citra dan digabung menjadi satu peta tutupan lahan beserta luas tiap kelas (Bagian 6).</p></li>
+<li><p><strong>Pentingnya validasi spasial.</strong> Kompresi piksel menjadi poligon dan validasi antar-wilayah mencegah kebocoran data spasial. Analisis per fold juga terbukti membantu menemukan ketimpangan sebaran sampel, termasuk pada kelas Hutan dan Mangrove.</p></li>
+<li><p><strong>Deployment.</strong> Hasil dipublikasikan dalam dashboard Streamlit interaktif yang menampilkan peta prediksi, luas tiap kelas, dan metrik evaluasi.</p></li>
 </ol>
+<section id="keterbatasan">
+<h3>Keterbatasan<a class="headerlink" href="#keterbatasan" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Sampel mangrove terkonsentrasi di tiga wilayah, sehingga F1 mangrove (0,62) pesimistis untuk Surabaya-Sidoarjo dan belum teruji pada pesisir lain.</p></li>
+<li><p>Prediksi per sel 100 × 100 m membuat sel di perbatasan dua jenis lahan hanya mendapat satu label.</p></li>
+<li><p>Satu komposit waktu (September) belum menangkap perubahan fase tanam pada lahan pertanian.</p></li>
+<li><p>Label sampel berasal dari interpretasi visual tanpa verifikasi lapangan, dan peta tidak memiliki data acuan penuh.</p></li>
+</ul>
+</section>
+<section id="saran-pengembangan">
+<h3>Saran Pengembangan<a class="headerlink" href="#saran-pengembangan" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Menambah sampel mangrove dari pesisir lain (pesisir utara, Madura, tapal kuda, dan Banyuwangi).</p></li>
+<li><p>Menambah sampel permukiman dan pertanian yang bercampur dengan vegetasi untuk mengurangi kekeliruan pada sel campuran.</p></li>
+<li><p>Menggunakan <strong>citra multi-waktu</strong> (misalnya musim hujan dan kemarau) serta data elevasi (DEM) sebagai fitur tambahan.</p></li>
+<li><p>Memvalidasi peta dengan titik acak independen yang dilabeli dari citra resolusi tinggi atau survei lapangan.</p></li>
+<li><p>Menguji ukuran sel yang lebih kecil dan membandingkan Random Forest dengan algoritma lain pada skema validasi yang sama.</p></li>
+</ol>
+<hr class="docutils" />
+</section>
 </section>
 </section>
 
@@ -1083,12 +1335,12 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="01_mulai-disini.html"
+       href="00_pengantar-proyek.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Mulai Menulis</p>
+        <p class="prev-next-title">Business Understanding</p>
       </div>
     </a>
 </div>
@@ -1141,20 +1393,29 @@ Peta klasifikasi, filter kelas lahan, <em>Confusion Matrix</em>, dan grafik kine
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-validasi-antar-wilayah">5.1. Skema Validasi Antar-Wilayah</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-evaluasi">5.2. Hasil Evaluasi</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#confusion-matrix">5.3. Confusion Matrix</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">5.3. Confusion Matrix</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-hasil">5.4. Analisis Hasil</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#riwayat-iterasi">5.5. Riwayat Iterasi</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-model-via-streamlit">6. Deployment (Penyebaran Model via Streamlit)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">6.1. Arsitektur Aplikasi</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">6.2. Fitur Interaktif Peta</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">6.3. Akses Publik</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prediksi-tutupan-lahan-jawa-timur">6. Prediksi Tutupan Lahan Jawa Timur</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skema-prediksi-berbasis-sel">6.1. Skema Prediksi Berbasis Sel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tahapan-proses">6.2. Tahapan Proses</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hasil-prediksi">6.3. Hasil Prediksi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keterbatasan-prediksi">6.4. Keterbatasan Prediksi</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">7. Kesimpulan</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment-penyebaran-hasil-via-streamlit">7. Deployment (Penyebaran Hasil via Streamlit)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alur-dari-data-ke-dashboard">7.1. Alur dari Data ke Dashboard</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arsitektur-aplikasi">7.2. Arsitektur Aplikasi</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fitur-interaktif-peta">7.3. Fitur Interaktif Peta</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#akses-publik">7.4. Akses Publik</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kesimpulan">8. Kesimpulan</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#keterbatasan">Keterbatasan</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#saran-pengembangan">Saran Pengembangan</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

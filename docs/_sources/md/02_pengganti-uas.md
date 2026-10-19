@@ -111,11 +111,11 @@ Sampel *ground truth* berupa **poligon yang didigitasi** di atas citra satelit r
 | Kelas         | Jumlah Poligon |
 | ------------- | -------------- |
 | **Bangunan**  | 73             |
-| **Pertanian** | 74             |
+| **Pertanian** | 143             |
 | **Air**       | 75             |
-| **Hutan**     | 121            |
+| **Hutan**     | 124            |
 | **Mangrove**  | 75             |
-| **Total**     | **418**        |
+| **Total**     | **490**        |
 
 ### 2.5. Akuisisi Citra via openEO
 
@@ -125,7 +125,7 @@ Citra diunduh melalui openEO dengan koleksi `SENTINEL2_L2A`. Karena sampel terse
 | ------------------- | ------------------------ |
 | Koleksi             | `SENTINEL2_L2A`          |
 | Periode citra       | 1 September 2026 – 30 September 2026   |
-| Batas tutupan awan  | 30 %                   |
+| Batas tutupan awan  | None                   |
 | Resolusi            | 10 m                  |
 | Format keluaran     | GeoTIFF (`.tif`)         |
 
@@ -135,7 +135,7 @@ Citra diunduh melalui openEO dengan koleksi `SENTINEL2_L2A`. Karena sampel terse
 
 ### 3.1. Ekstraksi Piksel dari Poligon
 
-Citra GeoTIFF dipotong menggunakan bentuk setiap poligon sampel (`rasterio.mask`), dan seluruh piksel di dalamnya diambil sebagai data. Piksel kosong (bernilai 0) dibuang. Proses ini menghasilkan **3.402.010 piksel** berlabel.
+Citra GeoTIFF dipotong menggunakan bentuk setiap poligon sampel (`rasterio.mask`), dan seluruh piksel di dalamnya diambil sebagai data. Piksel kosong (bernilai 0) dibuang. Proses ini menghasilkan **3.409.327 piksel** berlabel.
 
 ### 3.2. Kompresi Spasial (Piksel → Poligon)
 
@@ -143,16 +143,28 @@ Piksel yang bertetangga dalam satu poligon memiliki nilai spektral yang sangat m
 
 | Tahap                    | Jumlah Data                |
 | ------------------------ | -------------------------- |
-| Piksel hasil ekstraksi   | **3.402.010** piksel       |
-| Setelah kompresi spasial | **418** poligon            |
+| Piksel hasil ekstraksi   | **3.409.327** piksel       |
+| Setelah kompresi spasial | **490** poligon            |
 
 Kompresi ini juga mencegah poligon berukuran besar mendominasi proses pelatihan.
 
 ### 3.3. Fitur Tekstur Spasial
 
-Setiap poligon dideskripsikan oleh **18 fitur tekstur spasial** yang diturunkan dari 5 band asli (B02, B03, B04, B08, B11) dan 4 indeks spektral (NDVI, NDWI, MNDWI, NDBI). Fitur tekstur menangkap tidak hanya nilai rata-rata, tetapi juga variasi nilai di dalam poligon, yang membedakan permukaan homogen (misalnya air) dari permukaan heterogen (misalnya permukiman).
+Setiap poligon dideskripsikan oleh 18 fitur, yaitu rata-rata (_mean) dan simpangan baku (_std) dari sembilan lapisan: b02, b03, b04, b08, b11, ndvi, ndwi, mndwi, dan ndbi, yang dihitung dari seluruh piksel di dalam poligon. Rata-rata menangkap nilai khas objek, sedangkan simpangan baku menangkap keragaman (tekstur) di dalamnya, sehingga 9 lapisan menghasilkan **18 fitur**.
 
-[ISI: sebutkan 18 fitur yang dipakai, misalnya statistik yang dihitung per band atau indeks]
+| Lapisan | Fitur rata-rata | Fitur simpangan baku |
+| ------- | --------------- | -------------------- |
+| B02 (Blue)  | `b02_mean`   | `b02_std`   |
+| B03 (Green) | `b03_mean`   | `b03_std`   |
+| B04 (Red)   | `b04_mean`   | `b04_std`   |
+| B08 (NIR)   | `b08_mean`   | `b08_std`   |
+| B11 (SWIR)  | `b11_mean`   | `b11_std`   |
+| NDVI        | `ndvi_mean`  | `ndvi_std`  |
+| NDWI        | `ndwi_mean`  | `ndwi_std`  |
+| MNDWI       | `mndwi_mean` | `mndwi_std` |
+| NDBI        | `ndbi_mean`  | `ndbi_std`  |
+
+Rata-rata menangkap nilai khas suatu objek, sedangkan simpangan baku menangkap keragamannya (tekstur). Misalnya air relatif seragam (simpangan baku kecil), sedangkan permukiman bercampur atap, jalan, dan pohon (simpangan baku besar). Poligon yang hanya berisi satu piksel diberi simpangan baku 0.
 
 ### 3.4. Pengelompokan Wilayah untuk Validasi
 
@@ -162,7 +174,7 @@ Poligon dikelompokkan menjadi **wilayah** menggunakan algoritma **DBSCAN** pada 
 | ------------------- | ---------------------- |
 | Algoritma           | DBSCAN                 |
 | Radius (`eps`)      | 10.0 km               |
-| Jumlah wilayah      | 27                  |
+| Jumlah wilayah      | 29                  |
 
 Radius dipilih secara struktural: cukup besar untuk memisahkan poligon yang bertetangga, tetapi tidak sampai menyatukan sebagian besar sampel menjadi satu wilayah.
 
@@ -202,80 +214,173 @@ Evaluasi memakai **validasi silang berbasis wilayah**: seluruh poligon dari satu
 
 ### 5.2. Hasil Evaluasi
 
-**Akurasi Validasi Wilayah: 75,84%**
+**Akurasi Validasi Wilayah: 73,67%** (`GroupKFold` 5-fold berbasis wilayah, 490 poligon dari 29 wilayah)
 
-| Kelas         | F1-Score | Kategori     | Keterangan                                                    |
-| ------------- | -------- | ------------ | ------------------------------------------------------------- |
-| **Bangunan**  | 0,95     | Sangat baik  | Ciri spektral khas (SWIR tinggi, NDBI tinggi)                 |
-| **Air**       | 0,88     | Sangat baik  | Penyerapan NIR dan SWIR membedakannya dari daratan            |
-| **Mangrove**  | 0,77     | Baik         | Dapat dipisahkan dari hutan daratan berkat sinyal kelembapan  |
-| **Hutan**     | 0,74     | Baik         | Sebagian tertukar dengan vegetasi lain                        |
-| **Pertanian** | 0,47     | Rendah       | Kelas terlemah; ciri berubah mengikuti fase tanam             |
+| Kelas         | Precision | Recall | F1-Score | Kategori    | Keterangan                                                              |
+| ------------- | --------- | ------ | -------- | ----------- | ----------------------------------------------------------------------- |
+| **Bangunan**  | 0,92      | 0,89   | 0,90     | Sangat baik | Ciri spektral khas (SWIR tinggi, NDBI tinggi)                           |
+| **Air**       | 0,91      | 0,83   | 0,87     | Sangat baik | Penyerapan NIR dan SWIR membedakannya dari daratan                      |
+| **Hutan**     | 0,70      | 0,76   | 0,73     | Baik        | Saling tertukar dengan Pertanian                                        |
+| **Pertanian** | 0,60      | 0,72   | 0,66     | Sedang      | Membaik setelah sampel bertambah, tetapi masih tertukar dengan Hutan    |
+| **Mangrove**  | 0,82      | 0,49   | 0,62     | Sedang      | Precision tinggi, tetapi separuh poligon mangrove tidak terdeteksi      |
+
+Kategori F1: ≥ 0,85 sangat baik, 0,70-0,84 baik, 0,55-0,69 sedang, < 0,55 rendah.
 
 ### 5.3. Confusion Matrix
 
-Matriks kekeliruan lengkap dan grafik Precision, Recall, serta F1-Score per kelas ditampilkan secara interaktif pada dashboard Streamlit.
-
-## 5.3. Confusion Matrix
-
 | Aktual \ Prediksi | Bangunan | Pertanian | Air | Hutan | Mangrove | Total Aktual |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Bangunan** | 71 | 1 | 0 | 1 | 0 | **73** |
-| **Pertanian** | 4 | 34 | 5 | 25 | 6 | **74** |
-| **Air** | 0 | 8 | 63 | 4 | 0 | **75** |
-| **Hutan** | 2 | 16 | 0 | 96 | 7 | **121** |
-| **Mangrove** | 0 | 10 | 0 | 12 | 53 | **75** |
+| ----------------- | -------- | --------- | --- | ----- | -------- | ------------ |
+| **Bangunan**      | 65       | 7         | 0   | 1     | 0        | **73**       |
+| **Pertanian**     | 6        | 103       | 6   | 25    | 3        | **143**      |
+| **Air**           | 0        | 10        | 62  | 3     | 0        | **75**       |
+| **Hutan**         | 0        | 25        | 0   | 94    | 5        | **124**      |
+| **Mangrove**      | 0        | 26        | 0   | 12    | 37       | **75**       |
 
+Matriks yang sama ditampilkan secara interaktif pada dashboard Streamlit.
 
 ### 5.4. Analisis Hasil
 
-1. **Bangunan dan Air** memiliki kinerja tertinggi (F1 ≥ 0,88) karena memiliki ciri spektral yang sangat berbeda dari kelas lain.
-2. **Mangrove (0,77) dan Hutan (0,74)** cukup baik. Fitur tekstur dan indeks kelembapan membantu memisahkan vegetasi pesisir dari hutan daratan.
-3. **Pertanian (0,47)** adalah kelas terlemah. Diduga karena lahan pertanian melewati beberapa fase (genangan, tanam, hijau, panen) yang membuatnya mirip dengan kelas lain pada satu komposit waktu, terutama vegetasi. Dugaan ini perlu diuji dengan citra multi-waktu.
-4. Hasil dilaporkan dari **validasi antar-wilayah** sehingga cenderung lebih rendah dibanding evaluasi acak per piksel, tetapi lebih mencerminkan kinerja pada lokasi baru.
+1. **Bangunan dan Air** memiliki kinerja tertinggi (F1 ≥ 0,87) karena memiliki ciri spektral yang sangat berbeda dari kelas lain.
+2. **Pertanian dan Hutan** paling sering tertukar: 25 poligon Pertanian diprediksi Hutan dan 25 poligon Hutan diprediksi Pertanian. Keduanya sama-sama vegetasi hijau sehingga ciri spektralnya berdekatan pada satu komposit waktu. Dugaan ini perlu diuji dengan citra multi-waktu.
+3. **Pertanian (F1 0,66)** membaik dibanding iterasi sebelumnya (0,47) setelah jumlah sampelnya bertambah dari 74 menjadi 143 poligon dengan variasi kondisi lahan (genangan, bera, hijau, dan tegalan).
+4. **Mangrove (F1 0,62, recall 0,49)** adalah kelas yang paling menurun. Sebanyak 26 poligon mangrove diprediksi Pertanian dan 12 diprediksi Hutan. Penyebab yang paling mungkin adalah **sebaran sampel**: 54 dari 75 poligon mangrove berada di satu wilayah (Surabaya-Sidoarjo). Ketika wilayah itu menjadi data uji, model hanya belajar dari 21 poligon mangrove lain dan 36 dari 54 poligon tersebut salah diprediksi. Pada dua wilayah mangrove lainnya, 19 dari 21 poligon (sekitar 90%) diprediksi benar. Jadi F1 mangrove bersifat pesimistis untuk Surabaya-Sidoarjo dan belum menggambarkan kinerja pada pesisir lain.
+5. Hasil dilaporkan dari **validasi antar-wilayah** sehingga cenderung lebih rendah dibanding evaluasi acak per piksel, tetapi lebih mencerminkan kinerja pada lokasi baru.
 
 ### 5.5. Riwayat Iterasi
 
-| Iterasi    | Jumlah Poligon | Fitur                                    | Hasil Validasi Wilayah                        |
-| ---------- | -------------- | ---------------------------------------- | --------------------------------------------- |
-| **Awal**   | 366            | 9 fitur spektral (rata-rata per poligon) | 64,92% (rata-rata per fold), 68% (gabungan)   |
-| **Final**  | 418            | 18 fitur tekstur spasial                 | **75,84%**                                    |
+| Iterasi           | Jumlah Poligon | Fitur                                    | Hasil Validasi Wilayah                      |
+| ----------------- | -------------- | ---------------------------------------- | ------------------------------------------- |
+| **Awal**          | 366            | 9 fitur spektral (rata-rata per poligon) | 64,92% (rata-rata per fold), 68% (gabungan) |
+| **Iterasi 2**     | 418            | 18 fitur tekstur spasial                 | 75,84%                                      |
+| **Iterasi 3 (Final)** | 490        | 18 fitur tekstur spasial                 | **73,67%**                                  |
 
-Pada iterasi awal, analisis per fold menunjukkan akurasi yang tidak stabil: satu fold hanya 31,6% karena hampir seluruh isinya poligon hutan, dan sampel hutan terkumpul di sedikit wilayah. Temuan ini menjadi dasar penambahan sampel dan pengayaan fitur pada iterasi final. Kedua hasil tidak sepenuhnya sebanding karena komposisi fold dan jumlah sampelnya berbeda.
+- **Awal:** akurasi tidak stabil. Satu fold hanya 31,6% karena hampir seluruh isinya poligon hutan, dan sampel hutan terkumpul di sedikit wilayah.
+- **Iterasi 2:** sampel hutan ditambah (69 menjadi 121 poligon) dan fitur diperkaya dengan simpangan baku.
+- **Iterasi 3:** ditambah 72 poligon (Pertanian 74 menjadi 143 dan Hutan 121 menjadi 124) untuk memperkaya variasi kelas yang paling lemah. Pertanian membaik (F1 0,47 menjadi 0,66), sedangkan Mangrove menurun (0,77 menjadi 0,62) akibat sebaran sampel yang terpusat di satu wilayah (poin 4 pada 5.4).
 
----
+Ketiga hasil tidak sepenuhnya sebanding karena jumlah sampel dan komposisi fold berbeda pada tiap iterasi. Iterasi 3 dipilih sebagai model final karena memiliki sampel terbanyak dan cakupan variasi kelas yang lebih luas, walaupun akurasi totalnya sedikit di bawah iterasi 2.
 
-## 6. Deployment (Penyebaran Model via Streamlit)
+## 6. Prediksi Tutupan Lahan Jawa Timur
 
-### 6.1. Arsitektur Aplikasi
+Setelah model divalidasi, model diterapkan ke seluruh Provinsi Jawa Timur untuk menghasilkan peta tutupan lahan beserta luas tiap kelas.
 
-Model dan hasil evaluasi dipublikasikan sebagai ***Single-Page Application* (SPA)** interaktif berbasis **Streamlit**. Seluruh konten berada dalam satu halaman sehingga pengguna dapat melihat peta, filter, dan grafik tanpa berpindah halaman.
+### 6.1. Skema Prediksi Berbasis Sel
 
-| Komponen          | Keterangan                                                                              |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| **Peta**          | **Folium** (Leaflet) dengan basemap *Google Satellite* dan *OpenStreetMap*              |
-| **Filter kelas**  | Filter native melalui `FeatureGroup`; tiap kelas lahan dapat dicentang atau dihapus centangnya |
-| **Navigasi peta** | *Zoom* dan *pan*                                                                        |
-| **Grafik**        | **Plotly**: *Confusion Matrix* dan bar chart horizontal Precision, Recall, F1-Score     |
-| **Model**         | `model_LULC_jatim_texture.joblib`                                                       |
+Model dilatih pada statistik per poligon (rata-rata dan simpangan baku), sehingga citra tidak dapat diprediksi piksel demi piksel. Citra dibagi menjadi **sel 100 × 100 m** (10 × 10 piksel Sentinel-2), dan fitur setiap sel dihitung dengan cara yang sama seperti saat pelatihan. Ukuran 100 m dipilih sebagai kompromi antara jumlah piksel yang cukup untuk menghitung simpangan baku dan detail spasial peta.
 
-### 6.2. Fitur Interaktif Peta
+### 6.2. Tahapan Proses
+
+Seluruh Jawa Timur (sekitar 478 juta piksel pada resolusi 10 m) terlalu besar untuk diproses sekaligus, sehingga wilayah dipecah menjadi kotak-kotak dan perhitungan fitur dilakukan langsung di server openEO.
+
+| Tahap | Proses                                                                                                                           |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Membaca batas wilayah Jawa Timur (GeoJSON) yang sudah diberi margin pesisir agar perairan dekat pantai ikut terpetakan            |
+| 2     | Memotong area menjadi **126 kotak berukuran 30 × 30 km**; kotak yang berada di luar area dibuang                                  |
+| 3     | Per kotak, openEO menghitung indeks (NDVI, NDWI, MNDWI, NDBI) pada setiap piksel, lalu merata-ratakannya ke sel 100 m (`resample_spatial`, metode *average*) untuk 9 lapisan beserta kuadratnya |
+| 4     | Menurunkan simpangan baku dari rata-rata dan rata-rata kuadrat, lalu menyusun 18 fitur dengan urutan identik dengan pelatihan     |
+| 5     | Memprediksi kelas setiap sel dengan model; sel tanpa data diberi nilai kosong                                                    |
+| 6     | Menggabungkan seluruh kotak menjadi satu peta (`rasterio.merge`), memotongnya sesuai batas wilayah, dan menyimpannya sebagai `prediksi_jatim_100m.tif` |
+| 7     | Menghitung luas tiap kelas (1 sel = 100 × 100 m = 1 hektare)                                                                      |
+
+Parameter citra **sama dengan saat pelatihan**: koleksi `SENTINEL2_L2A`, lima band (B02, B03, B04, B08, B11), median temporal 1-30 September 2026, tanpa filter awan.
+
+Simpangan baku sel dihitung dari rata-rata ($\bar{x}$) dan rata-rata kuadrat ($\overline{x^2}$) dengan $n = 100$ piksel per sel:
+
+$$\sigma = \sqrt{\frac{n}{n-1}\left(\overline{x^2} - \bar{x}^2\right)}$$
+
+### 6.3. Hasil Prediksi
+
+![Peta Prediksi Tutupan Lahan Jawa Timur](../img/udara/peta_prediksi_jatim.png)
+
+| Kelas         | Luas (ha)     | Persen (%) |
+| ------------- | ------------- | ---------- |
+| **Bangunan**  | 300.679       | 4,8        |
+| **Pertanian** | 2.926.022     | 46,5       |
+| **Air**       | 1.536.676     | 24,4       |
+| **Hutan**     | 1.485.433     | 23,6       |
+| **Mangrove**  | 41.631        | 0,7        |
+| **Total**     | **6.290.441** | **100**    |
+
+Luas total area terpetakan adalah 6.290.441 hektare (sekitar 62.904 km²), termasuk margin perairan pesisir. Persentase dihitung terhadap total area tersebut, sehingga kelas Air (24,4%) sudah mencakup laut pada margin pesisir. Sel tanpa data di dalam batas wilayah sebesar 0,00%.
+
+Pertanian merupakan kelas terluas (46,5%), diikuti Air (24,4%) dan Hutan (23,6%), sedangkan Bangunan (4,8%) dan Mangrove (0,7%) menempati area yang jauh lebih kecil. Luas tiap kelas dihitung dari jumlah sel hasil prediksi (1 sel = 100 × 100 m = 1 hektare), sehingga merupakan **perkiraan** yang mengikuti akurasi model (73,67% pada validasi lintas wilayah), bukan hasil pengukuran langsung.
+
+### 6.4. Keterbatasan Prediksi
+
+- **Sel campuran.** Satu sel 100 × 100 m hanya dapat diberi satu label, padahal sel di perbatasan dua jenis lahan (misalnya mangrove dengan sawah, atau permukiman padat bervegetasi) berisi campuran. Pengamatan visual pada peta menunjukkan sebagian sel semacam ini diberi label Pertanian.
+- **Tanpa acuan penuh.** Tidak ada data acuan untuk seluruh wilayah, sehingga akurasi peta diperkirakan mengikuti hasil validasi lintas wilayah (73,67%) dan dapat lebih rendah pada wilayah dengan campuran lahan yang padat.
+- **Hanya 5 kelas.** Objek lain (misalnya tambak, lahan terbuka, atau area yang tertutup awan) tetap dipaksa masuk ke salah satu dari lima kelas.
+- **Satu komposit waktu.** Komposit median September (musim kemarau) tanpa filter awan belum menangkap perubahan fase tanam.
+
+## 7. Deployment (Penyebaran Hasil via Streamlit)
+
+### 7.1. Alur dari Data ke Dashboard
+
+| Tahap          | Proses                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| **Ambil**      | Citra Sentinel-2 diambil dari Copernicus Data Space melalui openEO                             |
+| **Proses**     | Indeks dan 18 fitur (rata-rata dan simpangan baku) dihitung per sel 100 m                      |
+| **Klasifikasi**| Model Random Forest memprediksi kelas tiap sel, lalu hasilnya digabung menjadi satu peta       |
+| **Informasi**  | Peta, luas tiap kelas, dan metrik evaluasi ditampilkan pada dashboard                          |
+
+Tahap ambil, proses, dan klasifikasi dijalankan di Google Colab. Hasilnya diekspor menjadi berkas ringan, sehingga dashboard hanya perlu menampilkan tanpa menghitung ulang.
+
+### 7.2. Arsitektur Aplikasi
+
+Hasil dipublikasikan sebagai ***Single-Page Application* (SPA)** interaktif berbasis **Streamlit**. Seluruh konten berada dalam satu halaman sehingga pengguna dapat melihat peta, luas, filter, dan grafik tanpa berpindah halaman.
+
+| Komponen            | Keterangan                                                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Peta**            | **Folium** (Leaflet) dengan basemap *Google Satellite* dan *OpenStreetMap*                                                  |
+| **Hasil prediksi**  | Lima gambar PNG transparan (satu per kelas) yang ditumpuk di atas citra satelit                                             |
+| **Layer sampel**    | Poligon sampel hasil digitasi sebagai layer tambahan (awalnya tidak dicentang)                                              |
+| **Filter kelas**    | Filter native melalui `FeatureGroup`; tiap kelas dapat dicentang atau dihapus centangnya, misalnya hanya menampilkan Pertanian |
+| **Informasi luas**  | Kartu luas (hektare dan persen) untuk tiap kelas                                                                            |
+| **Grafik**          | **Plotly**: *Confusion Matrix* dan bar chart horizontal Precision, Recall, F1-Score                                         |
+| **Sumber data**     | Folder `data/`: lima PNG, `peta_meta.json`, `metrik.json`, dan `luas_per_kelas.csv` (model tidak dimuat di dashboard)       |
+
+### 7.3. Fitur Interaktif Peta
 
 - **Basemap satelit** memungkinkan hasil klasifikasi dibandingkan langsung dengan kenampakan lahan sebenarnya.
-- **Filter per kelas** (misalnya hanya menampilkan Pertanian) memudahkan pengguna menelusuri satu jenis tutupan lahan.
-- **Warna per kelas** konsisten pada peta dan grafik sehingga mudah dibaca.
+- **Filter per kelas** memudahkan pengguna menelusuri satu jenis tutupan lahan.
+- **Warna per kelas** diambil dari satu sumber yang sama sehingga konsisten pada peta, legenda, dan grafik.
+- **Metrik dibaca dari berkas hasil evaluasi**, sehingga angka pada dashboard selalu sama dengan hasil model.
 
-### 6.3. Akses Publik
+| Kelas         | Warna        |
+| ------------- | ------------ |
+| **Bangunan**  | Merah        |
+| **Pertanian** | Kuning       |
+| **Air**       | Biru         |
+| **Hutan**     | Hijau tua    |
+| **Mangrove**  | Tosca        |
+
+### 7.4. Akses Publik
 
 Aplikasi dapat diakses secara publik melalui tautan berikut:
 
 🌐 **<https://dashboard-lulc-jatim.streamlit.app/>**
 
+---
+## 8. Kesimpulan
 
-## 7. Kesimpulan
+1. **Hasil utama.** Model Random Forest dengan 18 fitur tekstur spasial mencapai **akurasi validasi wilayah 73,67%** untuk 5 kelas tutupan lahan di Jawa Timur (490 poligon dari 29 wilayah). Angka ini diperoleh dari pengujian pada lokasi yang belum pernah dilihat model.
+2. **Kinerja per kelas.** Bangunan (F1 0,90) dan Air (0,87) terklasifikasi sangat baik, Hutan (0,73) baik, **Pertanian (0,66)** membaik dibanding iterasi sebelumnya (0,47), sedangkan **Mangrove (0,62, recall 0,49)** masih perlu ditingkatkan karena sampelnya terpusat pada sedikit wilayah.
+3. **Peta seluruh Jawa Timur.** Model berhasil diterapkan pada 126 kotak citra dan digabung menjadi satu peta tutupan lahan beserta luas tiap kelas (Bagian 6).
+4. **Pentingnya validasi spasial.** Kompresi piksel menjadi poligon dan validasi antar-wilayah mencegah kebocoran data spasial. Analisis per fold juga terbukti membantu menemukan ketimpangan sebaran sampel, termasuk pada kelas Hutan dan Mangrove.
+5. **Deployment.** Hasil dipublikasikan dalam dashboard Streamlit interaktif yang menampilkan peta prediksi, luas tiap kelas, dan metrik evaluasi.
 
-1. **Hasil utama.** Model Random Forest dengan 18 fitur tekstur spasial mencapai **akurasi validasi wilayah 75,84%** untuk 5 kelas tutupan lahan di Jawa Timur. Angka ini diperoleh dari pengujian pada lokasi yang belum pernah dilihat model.
-2. **Kinerja per kelas.** Bangunan (F1 0,95) dan Air (F1 0,88) terklasifikasi sangat baik, Mangrove (0,77) dan Hutan (0,74) cukup baik, sedangkan **Pertanian (0,47)** masih menjadi kelas yang perlu ditingkatkan.
-3. **Pentingnya validasi spasial.** Kompresi piksel menjadi poligon dan validasi antar-wilayah mencegah kebocoran data spasial. Analisis per fold juga terbukti membantu menemukan ketimpangan sebaran sampel.
-4. **Deployment.** Hasil dipublikasikan dalam dashboard Streamlit interaktif yang memungkinkan pemantauan tutupan lahan secara visual oleh pengguna umum.
+### Keterbatasan
 
+- Sampel mangrove terkonsentrasi di tiga wilayah, sehingga F1 mangrove (0,62) pesimistis untuk Surabaya-Sidoarjo dan belum teruji pada pesisir lain.
+- Prediksi per sel 100 × 100 m membuat sel di perbatasan dua jenis lahan hanya mendapat satu label.
+- Satu komposit waktu (September) belum menangkap perubahan fase tanam pada lahan pertanian.
+- Label sampel berasal dari interpretasi visual tanpa verifikasi lapangan, dan peta tidak memiliki data acuan penuh.
+
+### Saran Pengembangan
+
+1. Menambah sampel mangrove dari pesisir lain (pesisir utara, Madura, tapal kuda, dan Banyuwangi).
+2. Menambah sampel permukiman dan pertanian yang bercampur dengan vegetasi untuk mengurangi kekeliruan pada sel campuran.
+3. Menggunakan **citra multi-waktu** (misalnya musim hujan dan kemarau) serta data elevasi (DEM) sebagai fitur tambahan.
+4. Memvalidasi peta dengan titik acak independen yang dilabeli dari citra resolusi tinggi atau survei lapangan.
+5. Menguji ukuran sel yang lebih kecil dan membandingkan Random Forest dengan algoritma lain pada skema validasi yang sama.
+---
